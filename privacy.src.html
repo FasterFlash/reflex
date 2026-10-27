@@ -1,0 +1,260 @@
+<title>Reflex</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+
+<style>
+:root{
+  --paper:#F5F7F9;
+  --ground:#E7EAEF;
+  --ground-deep:#D7DCE3;
+  --ink:#10141A;
+  --ink-soft:#58626D;
+  --ink-faint:#7E8893;
+  --line:#C8CFD8;
+  --accent:#2B4BF2;
+  --font-display:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --font-ui:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --ease:cubic-bezier(.16,.84,.32,1);
+}
+body{background:var(--ground);color:var(--ink);font-family:var(--font-ui);-webkit-font-smoothing:antialiased}
+
+.page{
+  position:relative;isolation:isolate;overflow:hidden;
+  padding-left:max(1.5rem,env(safe-area-inset-left,0px));
+  padding-right:max(1.5rem,env(safe-area-inset-right,0px));
+  padding-block:1.75rem 4.5rem;
+  background:linear-gradient(180deg,var(--paper) 0%,var(--ground) 38%,var(--ground-deep) 100%);
+}
+.page::before{content:"";position:absolute;inset:-10% -10% auto;height:70vh;z-index:-1;pointer-events:none;background:radial-gradient(42% 60% at 28% 30%,rgba(255,255,255,.9),rgba(255,255,255,0) 70%)}
+.wrap{max-width:68rem;min-width:0;margin-inline:auto;display:flex;flex-direction:column;gap:clamp(2.5rem,6vw,4rem)}
+
+.top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem 1.25rem}
+.word{font-family:var(--font-display);font-size:1.7rem;line-height:1;letter-spacing:-.02em;color:var(--ink);text-decoration:none}
+.word:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:2px}
+
+/* ---------- nav (shared by every screen) ---------- */
+.nav{display:flex;align-items:center;flex-wrap:wrap;gap:.35rem 1.5rem;font-family:var(--font-ui);font-size:.85rem}
+.nav a,.nav .soon{position:relative;padding:.3rem 0;color:var(--ink-soft);text-decoration:none;white-space:nowrap}
+.nav a{transition:color .2s}
+.nav a:hover,.nav a[aria-current="page"]{color:var(--ink)}
+.nav a[aria-current="page"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:var(--ink)}
+.nav a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+.nav .soon{color:var(--ink-faint);cursor:default}
+.nav a.go{background:var(--ink);color:var(--paper);padding:.5rem 1.05rem;border-radius:3px;font-weight:500;transition:background .25s var(--ease),transform .25s var(--ease)}
+.nav a.go:hover{background:#000;color:var(--paper);transform:translateY(-1px)}
+.nav a.go[aria-current="page"]::after{display:none}
+.nav small{margin-left:.4rem;font-family:var(--font-mono);font-size:.58rem;letter-spacing:.07em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:.08rem .38rem;vertical-align:.1em}
+
+/* ---------- intro ---------- */
+.eyebrow{margin:0 0 1rem;font-family:var(--font-mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+.title{font-family:var(--font-display);font-weight:400;font-size:clamp(2.75rem,8vw,5.75rem);line-height:.95;letter-spacing:-.025em;margin:0 0 1rem;text-wrap:balance}
+.lede{margin:0;max-width:44ch;font-size:clamp(.95rem,1.5vw,1.05rem);line-height:1.5;color:var(--ink-soft)}
+
+/* ---------- claims ---------- */
+.claims{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.75rem}
+.claim{display:grid;grid-template-columns:minmax(0,13rem) minmax(0,1fr);gap:.5rem 2.5rem;padding:clamp(1.3rem,2.6vw,1.9rem) clamp(1.2rem,2.6vw,2rem);background:var(--paper);border:1px solid var(--line);border-radius:6px;cursor:default;transition:background .3s var(--ease),border-color .3s var(--ease),color .3s var(--ease),transform .3s var(--ease)}
+.claim .eyebrow{margin:.7rem 0 0;transition:color .3s var(--ease)}
+.claim h2{margin:0;max-width:24ch;font-family:var(--font-display);font-weight:400;font-size:clamp(1.7rem,3.4vw,2.5rem);line-height:1.04;letter-spacing:-.02em;text-wrap:balance;transition:color .3s var(--ease)}
+.claim h2 em{font-style:italic}
+.claim .reveal{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .4s var(--ease),opacity .3s var(--ease)}
+.claim .reveal>div{min-height:0;overflow:hidden}
+.claim .reveal>div>p:first-child{margin-top:.8rem}
+.claim p{margin:0 0 .6rem;max-width:56ch;font-size:.97rem;line-height:1.55;color:var(--ink-soft);transition:color .3s var(--ease)}
+.claim p:last-child{margin-bottom:0}
+.claim:hover,.claim:focus-visible,.claim:focus-within,.claim:target{background:var(--ink);border-color:var(--ink);transform:translateY(-2px);outline:none}
+.claim:hover .reveal,.claim:focus-visible .reveal,.claim:focus-within .reveal,.claim:target .reveal{grid-template-rows:1fr;opacity:1}
+.claim:hover h2,.claim:focus-visible h2,.claim:target h2{color:#fff}
+.claim:hover .eyebrow,.claim:focus-visible .eyebrow,.claim:target .eyebrow{color:#8D97A3}
+.claim:hover p,.claim:focus-visible p,.claim:target p{color:#C3CAD3}
+.claim:focus-visible{box-shadow:0 0 0 2px var(--accent)}
+.claim:hover p b,.claim:focus-visible p b,.claim:target p b{color:#fff}
+.claim p a{color:#fff}
+/* the AI box is always open and dark: the one claim with a catch should never hide */
+#ai.claim{background:var(--ink);border-color:var(--ink)}
+#ai.claim .reveal{grid-template-rows:1fr;opacity:1}
+#ai.claim h2{color:#fff}
+#ai.claim .eyebrow{color:#8D97A3}
+#ai.claim p{color:#C3CAD3}
+#ai.claim p b{color:#fff}
+#ai.claim .eyebrow::before{content:"";display:inline-block;width:.45rem;height:.45rem;margin-right:.55rem;border-radius:50%;background:#7F94FF;vertical-align:.08em}
+@media (hover:none){.claim .reveal{grid-template-rows:1fr;opacity:1}}
+@media (prefers-reduced-motion:reduce){.claim,.claim .reveal{transition:none}}
+
+/* ---------- read / never ---------- */
+.ledger{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(1rem,2.4vw,1.75rem)}
+.col{min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:clamp(1.1rem,2.6vw,1.9rem)}
+.col h3{margin:0 0 1rem;font-family:var(--font-display);font-weight:400;font-size:clamp(1.6rem,3vw,2.2rem);line-height:1;letter-spacing:-.015em}
+.col ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.7rem}
+.col li{display:flex;gap:.75rem;font-size:.95rem;line-height:1.45;color:var(--ink-soft)}
+.col li::before{content:"";flex:none;width:.45rem;height:.45rem;margin-top:.5em;border-radius:50%;background:var(--accent)}
+.col--never li::before{background:none;border:1.5px solid var(--ink-faint)}
+.col li b{font-weight:500;color:var(--ink)}
+
+/* ---------- limits ---------- */
+.limits{border-radius:4px;color:#F5F7F9;padding:clamp(1.4rem,3.4vw,2.6rem);background:radial-gradient(70% 55% at 90% 0%,rgba(84,112,255,.3),rgba(84,112,255,0) 70%),var(--ink)}
+.limits .eyebrow{color:#8D97A3}
+.limits h2{margin:0 0 1.5rem;max-width:20ch;font-family:var(--font-display);font-weight:400;font-size:clamp(2rem,4.4vw,3.2rem);line-height:1;letter-spacing:-.02em;text-wrap:balance}
+.limits ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.1rem clamp(1.5rem,4vw,3rem)}
+.limits li{font-size:.95rem;line-height:1.55;color:#B4BDC8}
+.limits li b{font-weight:500;color:#F5F7F9}
+
+.cta{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.25rem 2rem}
+.cta-line{margin:0;font-family:var(--font-display);font-size:clamp(1.5rem,3vw,2.1rem);line-height:1.15;letter-spacing:-.01em;text-wrap:balance}
+.enter{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:.6rem;font-family:var(--font-ui);font-size:.9rem;font-weight:500;letter-spacing:.005em;color:var(--paper);background:var(--ink);border:1px solid var(--ink);border-radius:3px;padding:.8rem 1.35rem;text-decoration:none;transition:background .25s var(--ease),transform .25s var(--ease)}
+.enter:hover{background:#000;transform:translateY(-1px)}
+.enter:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.enter svg{flex:none;transition:transform .3s var(--ease)}
+.enter:hover svg{transform:translateX(3px)}
+
+.foot{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:.6rem 2rem;margin-top:-1rem;font-family:var(--font-mono);font-size:.7rem;letter-spacing:.05em;color:var(--ink-soft)}
+.foot p{margin:0}.foot b{font-weight:400;color:var(--ink)}.foot i{font-style:italic}
+
+/* ---------- surface light ---------- */
+.sheen{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:0;background:radial-gradient(260px 260px at var(--x,50%) var(--y,50%),rgba(255,255,255,.4),rgba(255,255,255,0) 70%);transition:opacity .4s var(--ease)}
+@media (hover:hover) and (pointer:fine){.sheen{opacity:1}}
+.sweep{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:0;background:linear-gradient(104deg,transparent 36%,rgba(255,255,255,.9) 50%,transparent 64%);transform:translateX(-120%)}
+.sweep.arrive{animation:arrive .75s cubic-bezier(.2,0,.2,1) both}
+@keyframes arrive{from{opacity:1;transform:translateX(0)}to{opacity:1;transform:translateX(120%)}}
+
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.rise{animation:rise .8s var(--ease) var(--d,0s) both}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.001s!important}
+}
+@media (max-width:760px){
+  .claim{grid-template-columns:minmax(0,1fr)}
+  .claim .eyebrow{margin:0}
+  .ledger,.limits ul{grid-template-columns:minmax(0,1fr)}
+}
+
+/* big screens: scale the whole page up a notch and give it more width, so it doesn't float in the middle */
+@media (min-width:1500px){html{font-size:112.5%}.wrap{max-width:80rem}}
+@media (min-width:1900px){html{font-size:125%}.wrap{max-width:80rem}}
+@media (min-width:2500px){html{font-size:150%}}
+</style>
+
+<div class="page">
+  <div class="wrap">
+
+    <header class="top rise">
+      <a class="word" href="index.html">Reflex</a>
+      <nav class="nav" aria-label="Primary"><a href="about.html">What it is</a><a href="preview.html">Preview</a><a href="how.html">How it works</a><a href="privacy.html" aria-current="page">Privacy</a><a class="go" href="upload.html">Upload</a></nav>
+    </header>
+
+    <section class="rise" style="--d:.08s">
+      <h1 class="title">Ok but what do you do with my file?</h1>
+      <p class="lede">Fair question. Short version: I read it once, make your report, and let it go. Long version below, including the parts that don’t make me look great.</p>
+    </section>
+
+    <ol class="claims">
+      <li tabindex="0" class="claim rise" style="--d:.14s">
+        <p class="eyebrow">01 &middot; What I open</p>
+        <div>
+          <h2>Only the YouTube files you give me.</h2>
+<div class="reveal"><div>          <p>Watch history, search history, subscriptions. Nothing else from Google, since you only ticked YouTube in step 3. Anything else in the export, like a kids profile, gets ignored.</p>
+</div></div>
+        </div>
+      </li>
+      <li tabindex="0" class="claim rise" style="--d:.2s">
+        <p class="eyebrow">02 &middot; Where it lives</p>
+        <div>
+          <h2>In memory while I work. <em>Not in a database.</em></h2>
+<div class="reveal"><div>          <p>Your file gets read, counted and dropped. Your history never goes into a database or a log.</p>
+</div></div>
+        </div>
+      </li>
+      <li tabindex="0" class="claim rise" id="ai" style="--d:.26s">
+        <p class="eyebrow">03 &middot; About AI</p>
+        <div>
+          <h2>AI never reads your history. <em>Only a tiny summary, and only if you tap it.</em></h2>
+<div class="reveal"><div>          <p>The tagline button sends Google&rsquo;s Gemini about 20 numbers: your hours, the videos vs Shorts split, your top three categories, your busiest time of day, your longest sitting and Shorts scroll, and your <b>top 5 channel names</b>. Never your name, a video title, a search, a timestamp or the file. The report shows you the exact payload before anything leaves, and the tile works fine without it.</p>
+          <p><b>Why:</b> so the taglines can say something real about you. <b>The catch:</b> this runs on Gemini&rsquo;s free tier. Google&rsquo;s terms for that tier say it may use what it receives to improve its products, and people there may read it. It doesn&rsquo;t get your name, but a list of channels is still a bit of a fingerprint. That&rsquo;s why it&rsquo;s opt-in, and why there&rsquo;s no chatbot: nobody can type anything to the model.</p>
+</div></div>
+        </div>
+      </li>
+      <li tabindex="0" class="claim rise" style="--d:.32s">
+        <p class="eyebrow">04 &middot; When it&rsquo;s gone</p>
+        <div>
+          <h2>Report’s done, file’s gone.</h2>
+<div class="reveal"><div>          <p>I keep no copy of your ZIP. Close the report and nothing about you is left on my side.</p>
+</div></div>
+        </div>
+      </li>
+      <li tabindex="0" class="claim rise" style="--d:.38s">
+        <p class="eyebrow">05 &middot; Don&rsquo;t just trust me</p>
+        <div>
+          <h2>The code that reads it is public.</h2>
+<div class="reveal"><div>          <p>See exactly what happens to your file, line by line, instead of trusting a paragraph on a website.</p>
+</div></div>
+        </div>
+      </li>
+    </ol>
+
+    <section class="ledger rise" style="--d:.44s">
+      <div class="col">
+        <h3>What I read</h3>
+        <ul>
+          <li><span><b>Video titles + watch times.</b> To count hours and spot your habits.</span></li>
+          <li><span><b>Channel names.</b> To see who you’re actually watching.</span></li>
+          <li><span><b>Your searches.</b> To catch what you keep looking up.</span></li>
+          <li><span><b>Your subscriptions.</b> To compare who you follow with who you watch.</span></li>
+        </ul>
+      </div>
+      <div class="col col--never">
+        <h3>What I never do</h3>
+        <ul>
+          <li><span><b>Sell it</b> or hand it to advertisers.</span></li>
+          <li><span><b>Train a model on your history.</b> The AI taglines only get the summary above.</span></li>
+          <li><span><b>Keep a copy</b> of your file.</span></li>
+          <li><span><b>Make you sign up</b> or ask for your email.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="limits rise" style="--d:.5s">
+      <p class="eyebrow">The honest part</p>
+      <h2>What I can&rsquo;t promise, tbh.</h2>
+      <ul>
+        <li><b>Your file does travel.</b> It goes from your browser to a server over an encrypted connection, and that server holds it for the minute or so it takes to process.</li>
+        <li><b>Video IDs go to YouTube.</b> To get each video&rsquo;s length and category, I ask YouTube about the IDs you watched. Not when, not how often, not who you are. Those public facts get cached so the next lookup&rsquo;s faster.</li>
+        <li><b>You’re trusting me while it runs.</b> The public code lets you check what I say, but it can’t force the server to run exactly that code.</li>
+        <li><b>I’m one person.</b> Solo project, not a company with a security team and an audit.</li>
+        <li><b>The AI part runs on a free tier.</b> It&rsquo;s a student project, so I use Gemini&rsquo;s free tier, where Google may keep and learn from what it gets. If I move to a paid tier I&rsquo;ll change this page.</li>
+        <li><b>Feedback is the one thing I keep.</b> If you use the feedback form, I store your message, its type, the time, and a reply address only if you type one. Never your IP, never anything from your report.</li>
+        <li><b>Your ZIP still sits with Google.</b> Once your report’s done, you can delete that download yourself.</li>
+      </ul>
+    </section>
+
+    <div class="cta rise" style="--d:.56s">
+      <p class="cta-line">Still here? Here’s how to get your file.</p>
+      <a class="enter" id="go" href="how.html"><span>How it works</span><svg width="15" height="11" viewBox="0 0 15 11" fill="none" aria-hidden="true"><path d="M1 5.5h12M9 1.5l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </div>
+
+    <footer class="foot">
+      <p class="foot-def"><b>respect</b> <i>(n.)</i> &mdash; taking what you need and leaving the rest alone.</p>
+      <p class="foot-note">Made by Tarun &middot; Not affiliated with YouTube or Google.</p>
+    </footer>
+
+  </div>
+</div>
+
+<div class="sheen" aria-hidden="true"></div>
+<div class="sweep arrive" aria-hidden="true"></div>
+
+<script>
+(function(){
+  var sheen = document.querySelector('.sheen');
+  var sweep = document.querySelector('.sweep');
+  if (window.matchMedia('(hover:hover) and (pointer:fine)').matches){
+    window.addEventListener('pointermove', function(e){
+      sheen.style.setProperty('--x', e.clientX + 'px');
+      sheen.style.setProperty('--y', e.clientY + 'px');
+    }, {passive:true});
+  }
+  sweep.addEventListener('animationend', function(){ sweep.classList.remove('arrive'); });
+})();
+</script>

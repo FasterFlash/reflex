@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>*,*::before,*::after{box-sizing:border-box}:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Reflex</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+
+<style>
+:root{
+  --paper:#F5F7F9;
+  --ground:#E7EAEF;
+  --ground-deep:#D7DCE3;
+  --ink:#10141A;
+  --ink-soft:#58626D;
+  --ink-faint:#7E8893;
+  --line:#C8CFD8;
+  --accent:#2B4BF2;
+  --font-display:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --font-ui:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --ease:cubic-bezier(.16,.84,.32,1);
+}
+body{background:var(--ground);color:var(--ink);font-family:var(--font-ui);-webkit-font-smoothing:antialiased}
+
+.page{
+  position:relative;isolation:isolate;overflow:hidden;
+  padding-left:max(1.5rem,env(safe-area-inset-left,0px));
+  padding-right:max(1.5rem,env(safe-area-inset-right,0px));
+  padding-block:1.75rem 4.5rem;
+  background:linear-gradient(180deg,var(--paper) 0%,var(--ground) 38%,var(--ground-deep) 100%);
+}
+.page::before{content:"";position:absolute;inset:-10% -10% auto;height:70vh;z-index:-1;pointer-events:none;background:radial-gradient(42% 60% at 28% 30%,rgba(255,255,255,.9),rgba(255,255,255,0) 70%)}
+.wrap{max-width:68rem;min-width:0;margin-inline:auto;display:flex;flex-direction:column;gap:clamp(2.5rem,6vw,4rem)}
+
+.top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem 1.25rem}
+.word{font-family:var(--font-display);font-size:1.7rem;line-height:1;letter-spacing:-.02em;color:var(--ink);text-decoration:none}
+.word:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:2px}
+
+/* ---------- nav (shared by every screen) ---------- */
+.nav{display:flex;align-items:center;flex-wrap:wrap;gap:.35rem 1.5rem;font-family:var(--font-ui);font-size:.85rem}
+.nav a,.nav .soon{position:relative;padding:.3rem 0;color:var(--ink-soft);text-decoration:none;white-space:nowrap}
+.nav a{transition:color .2s}
+.nav a:hover,.nav a[aria-current="page"]{color:var(--ink)}
+.nav a[aria-current="page"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:var(--ink)}
+.nav a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+.nav .soon{color:var(--ink-faint);cursor:default}
+.nav a.go{background:var(--ink);color:var(--paper);padding:.5rem 1.05rem;border-radius:3px;font-weight:500;transition:background .25s var(--ease),transform .25s var(--ease)}
+.nav a.go:hover{background:#000;color:var(--paper);transform:translateY(-1px)}
+.nav a.go[aria-current="page"]::after{display:none}
+.nav small{margin-left:.4rem;font-family:var(--font-mono);font-size:.58rem;letter-spacing:.07em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:.08rem .38rem;vertical-align:.1em}
+
+/* ---------- intro ---------- */
+.eyebrow{margin:0 0 1rem;font-family:var(--font-mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+.title{font-family:var(--font-display);font-weight:400;font-size:clamp(2.75rem,8vw,5.75rem);line-height:.95;letter-spacing:-.025em;margin:0 0 1rem;text-wrap:balance}
+.lede{margin:0;max-width:44ch;font-size:clamp(.95rem,1.5vw,1.05rem);line-height:1.5;color:var(--ink-soft)}
+
+.cta{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.25rem 2rem}
+.cta-line{margin:0;font-family:var(--font-display);font-size:clamp(1.5rem,3vw,2.1rem);line-height:1.15;letter-spacing:-.01em;text-wrap:balance}
+.enter{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:.6rem;font-family:var(--font-ui);font-size:.9rem;font-weight:500;letter-spacing:.005em;color:var(--paper);background:var(--ink);border:1px solid var(--ink);border-radius:3px;padding:.8rem 1.35rem;text-decoration:none;transition:background .25s var(--ease),transform .25s var(--ease)}
+.enter:hover{background:#000;transform:translateY(-1px)}
+.enter:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.enter svg{flex:none;transition:transform .3s var(--ease)}
+.enter:hover svg{transform:translateX(3px)}
+
+.foot{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:.6rem 2rem;margin-top:-1rem;font-family:var(--font-mono);font-size:.7rem;letter-spacing:.05em;color:var(--ink-soft)}
+.foot p{margin:0}.foot b{font-weight:400;color:var(--ink)}.foot i{font-style:italic}
+
+/* ---------- surface light ---------- */
+.sheen{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:0;background:radial-gradient(260px 260px at var(--x,50%) var(--y,50%),rgba(255,255,255,.4),rgba(255,255,255,0) 70%);transition:opacity .4s var(--ease)}
+@media (hover:hover) and (pointer:fine){.sheen{opacity:1}}
+.sweep{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:0;background:linear-gradient(104deg,transparent 36%,rgba(255,255,255,.9) 50%,transparent 64%);transform:translateX(-120%)}
+.sweep.arrive{animation:arrive .75s cubic-bezier(.2,0,.2,1) both}
+@keyframes arrive{from{opacity:1;transform:translateX(0)}to{opacity:1;transform:translateX(120%)}}
+
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.rise{animation:rise .8s var(--ease) var(--d,0s) both}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.001s!important}
+}
+/* ---------- upload ---------- */
+.zone{
+  position:relative;
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:4px;
+  padding:clamp(1rem,2.4vw,1.5rem);
+}
+.drop{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;text-align:center;
+  min-height:clamp(17rem,38vw,23rem);
+  padding:2rem 1.25rem;
+  border:1.5px dashed var(--ink-faint);
+  border-radius:3px;
+  cursor:pointer;
+  transition:border-color .25s var(--ease),background .25s var(--ease);
+}
+.drop:hover{border-color:var(--ink-soft)}
+.drop:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.zone.over .drop{border-color:var(--accent);border-style:solid;background:rgba(43,75,242,.05)}
+.drop-ic{display:grid;place-items:center;width:3.2rem;height:3.2rem;border-radius:50%;border:1px solid var(--line);background:var(--ground);color:var(--ink);transition:transform .3s var(--ease)}
+.zone.over .drop-ic{transform:translateY(-4px);border-color:var(--accent);color:var(--accent)}
+.drop h2{margin:0;font-family:var(--font-display);font-weight:400;font-size:clamp(1.8rem,4vw,2.8rem);line-height:1;letter-spacing:-.02em}
+.drop h2 em{font-style:italic}
+.drop p{margin:0;max-width:42ch;font-size:.92rem;line-height:1.5;color:var(--ink-soft)}
+.drop p u{text-decoration-color:var(--ink-faint);text-underline-offset:3px;color:var(--ink)}
+.mono{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.05em;color:var(--ink-faint)}
+
+.view{display:none}
+.zone[data-view="idle"] [data-v="idle"],
+.zone[data-view="busy"] [data-v="busy"],
+.zone[data-view="reading"] [data-v="reading"],
+.zone[data-view="ready"] [data-v="ready"],
+.zone[data-view="problem"] [data-v="problem"]{display:block}
+
+.panel-in{padding:clamp(.5rem,1.6vw,1rem) clamp(.25rem,1.2vw,.75rem)}
+.file{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:.25rem 1rem;margin:0 0 1.25rem;font-family:var(--font-mono);font-size:.74rem;letter-spacing:.03em;color:var(--ink-soft)}
+.file b{font-weight:400;color:var(--ink);overflow-wrap:anywhere}
+.head{margin:0 0 .6rem;max-width:24ch;font-family:var(--font-display);font-weight:400;font-size:clamp(1.9rem,4.4vw,3.2rem);line-height:1.02;letter-spacing:-.02em;text-wrap:balance}
+.head em{font-style:italic}
+.say{margin:0 0 1.5rem;max-width:56ch;font-size:.97rem;line-height:1.55;color:var(--ink-soft)}
+.say b{font-weight:500;color:var(--ink)}
+
+.bar{position:relative;height:3px;margin:1.5rem 0 1rem;background:var(--ground);border-radius:2px;overflow:hidden}
+.bar::after{content:"";position:absolute;top:0;bottom:0;left:-35%;width:35%;background:var(--accent);animation:slide 1.1s var(--ease) infinite}
+@keyframes slide{to{transform:translateX(400%)}}
+
+.bar.det::after{display:none}
+.bar i{position:absolute;top:0;bottom:0;left:0;width:0;background:var(--accent);transition:width .35s var(--ease)}
+.steps{list-style:none;margin:0 0 1.25rem;padding:0;display:flex;flex-direction:column;gap:.5rem;font-size:.92rem;color:var(--ink-faint)}
+.steps li{display:flex;align-items:baseline;gap:.6rem}
+.steps li::before{content:"";flex:none;width:.5rem;height:.5rem;border-radius:50%;border:1px solid var(--ink-faint);transform:translateY(-.05rem)}
+.steps li.now{color:var(--ink)}
+.steps li.now::before{background:var(--accent);border-color:var(--accent)}
+.steps li.past{color:var(--ink-soft)}
+.steps li.past::before{background:var(--ink-soft);border-color:var(--ink-soft)}
+.steps .n{margin-left:auto;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.03em;color:var(--ink-soft)}
+.sendnote{margin:1rem 0 0;max-width:56ch;font-size:.85rem;line-height:1.5;color:var(--ink-soft)}
+.sendnote a{color:var(--ink);text-decoration-color:var(--line);text-underline-offset:3px}
+.found{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin:0 0 1.5rem;background:var(--line);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.found>div{background:var(--paper);padding:1rem 1.1rem}
+.found dt{margin:0 0 .35rem;font-family:var(--font-mono);font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+.found dd{margin:0;font-family:var(--font-display);font-size:clamp(1.5rem,3vw,2.1rem);line-height:1;letter-spacing:-.015em}
+.found dd small{font-family:var(--font-ui);font-size:.8rem;letter-spacing:0;color:var(--ink-soft)}
+
+.parts{list-style:none;margin:0 0 1.5rem;padding:0;display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;font-size:.9rem;color:var(--ink)}
+.parts li{display:inline-flex;align-items:center;gap:.5rem}
+.parts li::before{content:"";width:.9rem;height:.9rem;background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none'%3E%3Ccircle cx='7' cy='7' r='6.2' stroke='%232B4BF2' stroke-width='1.2'/%3E%3Cpath d='M4.2 7.2l2 2 3.6-4' stroke='%232B4BF2' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.parts li.off{color:var(--ink-soft)}
+.parts li.off::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none'%3E%3Ccircle cx='7' cy='7' r='6.2' stroke='%23949EA9' stroke-width='1.2' stroke-dasharray='2 2'/%3E%3C/svg%3E")}
+
+.warn{display:none;margin:0 0 1.5rem;padding:.9rem 1.1rem;border-left:2px solid var(--ink);background:var(--ground);font-size:.92rem;line-height:1.5;color:var(--ink-soft)}
+.warn b{font-weight:500;color:var(--ink)}
+.zone.thin .warn{display:block}
+
+.acts{display:flex;align-items:center;flex-wrap:wrap;gap:.9rem 1.5rem}
+.link{background:none;border:0;padding:.3rem 0;font:inherit;font-size:.9rem;color:var(--ink-soft);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px;cursor:pointer}
+.link:hover{color:var(--ink);text-decoration-color:var(--ink)}
+.link:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+button.enter{font-family:var(--font-ui);cursor:pointer}
+.enter::after{content:"";position:absolute;top:0;bottom:0;left:-60%;width:45%;pointer-events:none;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55) 42%,rgba(126,152,255,.75) 52%,transparent);opacity:0}
+.enter.is-pressed::after{animation:glint .6s var(--ease)}
+@keyframes glint{0%{opacity:1;transform:translateX(0)}100%{opacity:1;transform:translateX(360%)}}
+.after{display:none;margin:1rem 0 0;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.03em;color:var(--ink-soft)}
+.after.on{display:block}
+
+.trust{border-top:1px solid var(--line);padding-top:1.5rem}
+.trust .eyebrow{margin:0 0 1.1rem}
+.trust ul{list-style:none;margin:0 0 1.25rem;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem}
+.trust li{position:relative;display:flex;flex-direction:column;gap:.35rem;padding:1.1rem 1.1rem 1.2rem;background:var(--paper);border:1px solid var(--line);border-radius:6px;font-size:.84rem;line-height:1.5;color:var(--ink-soft);transition:background .25s var(--ease),color .25s var(--ease),border-color .25s var(--ease),transform .25s var(--ease)}
+.trust li svg{width:1.35rem;height:1.35rem;margin-bottom:.7rem;color:var(--accent);transition:color .25s var(--ease)}
+.trust li b{display:block;font-family:var(--font-display);font-weight:400;font-size:1.3rem;line-height:1.1;letter-spacing:-.01em;color:var(--ink);transition:color .25s var(--ease)}
+.trust li:hover{background:var(--ink);border-color:var(--ink);color:#C3CAD3;transform:translateY(-2px)}
+.trust li:hover b{color:#fff}.trust li:hover svg{color:#7F94FF}
+.trust p{margin:0;font-size:.9rem;color:var(--ink-soft)}
+.trust p a{display:inline-flex;gap:.4rem;align-items:center;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:2px;transition:border-color .2s,gap .2s}
+.trust p a:hover{border-color:var(--ink);gap:.65rem}
+@media (max-width:900px){.trust ul{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.trust ul{grid-template-columns:1fr}.trust li{flex-direction:row;flex-wrap:wrap;column-gap:.8rem}.trust li svg{margin:0}.trust li b{flex:1}.trust li span{flex-basis:100%}}
+.looks{display:grid;grid-template-columns:auto 1fr;gap:.25rem 1.25rem;border-top:1px solid var(--line);padding-top:1.5rem}
+.looks .eyebrow{margin:.15rem 0 0}
+.looks p{margin:0;max-width:62ch;font-size:.92rem;line-height:1.55;color:var(--ink-soft)}
+.looks p b{font-weight:500;color:var(--ink)}
+
+
+@media (max-width:640px){
+  .found{grid-template-columns:minmax(0,1fr)}
+  .looks{grid-template-columns:minmax(0,1fr)}
+}
+
+/* big screens: scale the whole page up a notch and give it more width, so it doesn't float in the middle */
+@media (min-width:1500px){html{font-size:112.5%}.wrap{max-width:80rem}}
+@media (min-width:1900px){html{font-size:125%}.wrap{max-width:80rem}}
+@media (min-width:2500px){html{font-size:150%}}
+
+/* ---------- the waiting screen: a live gradient that follows the cursor ---------- */
+.stage{position:relative;overflow:hidden;border-radius:3px;min-height:clamp(26rem,52vw,32rem);background:#0B0F16;color:#F2F4F7;isolation:isolate;cursor:crosshair}
+.stage .fx{position:absolute;inset:0;width:100%;height:100%;z-index:-1;display:block}
+.stage-in{position:relative;display:flex;flex-direction:column;min-height:inherit;padding:clamp(1.25rem,3.4vw,2.4rem);pointer-events:none}
+.stage-in .file{color:rgba(242,244,247,.6)}.stage-in .file b{color:#fff}
+.pct{display:flex;align-items:baseline;gap:.2rem;margin:.6rem 0 .2rem;font-family:var(--font-display);line-height:.82;letter-spacing:-.04em;background:linear-gradient(180deg,#fff 30%,#9FB0FF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pct b{font-weight:400;font-size:clamp(5.5rem,17vw,10.5rem);font-variant-numeric:tabular-nums}
+.pct span{font-style:italic;font-size:clamp(1.8rem,4.4vw,3rem);opacity:.8}
+.stage .head{color:#fff;margin-bottom:.4rem}
+.stage .bar{background:rgba(255,255,255,.14);height:4px}
+.stage .bar i{background:linear-gradient(90deg,#4F6BFF,#B8C4FF);box-shadow:0 0 18px 2px rgba(111,134,255,.7)}
+.stage .steps{margin:.2rem 0 1.1rem;display:grid;grid-auto-flow:column;grid-template-rows:repeat(2,auto);grid-template-columns:repeat(2,minmax(0,1fr));gap:.45rem 1.5rem;color:rgba(242,244,247,.42)}
+.stage .steps li::before{border-color:rgba(242,244,247,.4)}
+.stage .steps li.now{color:#fff}.stage .steps li.now::before{background:#8FA2FF;border-color:#8FA2FF;box-shadow:0 0 0 0 rgba(143,162,255,.7);animation:ping 1.4s ease-out infinite}
+.stage .steps li.past{color:rgba(242,244,247,.72)}.stage .steps li.past::before{background:rgba(242,244,247,.72);border-color:transparent}
+@keyframes ping{to{box-shadow:0 0 0 .55rem rgba(143,162,255,0)}}
+.tease{margin:auto 0 .9rem;padding-top:1rem;min-height:2.6em;font-family:var(--font-display);font-style:italic;font-size:clamp(1.25rem,2.6vw,1.75rem);line-height:1.15;color:#CBD4FF;transition:opacity .45s var(--ease),transform .45s var(--ease)}
+.tease.out{opacity:0;transform:translateY(.4rem)}
+.stage .stage-say{margin:0;font-size:.85rem;color:rgba(242,244,247,.55)}
+.stage .fxhint{display:inline-block;margin-left:.4rem;color:#9FB0FF}
+@media (hover:none){.stage .fxhint{display:none}}
+@media (max-width:560px){.stage .steps{grid-auto-flow:row;grid-template-rows:none;grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){.stage .steps li.now::before{animation:none}.tease{transition:none}}
+
+/* ---------- big footer (added by build.py, same on every page) ---------- */
+.bigfoot{position:relative;z-index:60;isolation:isolate;overflow:hidden;background:var(--ink,#10141A);color:var(--paper,#F5F7F9);padding:clamp(3rem,6vw,5rem) max(1.5rem,env(safe-area-inset-right,0px)) 2rem max(1.5rem,env(safe-area-inset-left,0px))}
+.bigfoot::before{content:"";position:absolute;z-index:-1;inset:-40% -10% auto 35%;height:140%;background:radial-gradient(50% 50% at 70% 20%,rgba(84,112,255,.32),rgba(84,112,255,0) 70%);pointer-events:none}
+.bf-in{max-width:68rem;margin-inline:auto;display:flex;flex-direction:column;gap:clamp(1.5rem,3.5vw,2.75rem)}
+.bf-word{margin:0;font-family:var(--font-display,"Instrument Serif",Georgia,serif);font-weight:400;font-size:calc(min(100vw - 3rem, 68rem) * 1.15 / (var(--n) + 1));line-height:.88;padding-bottom:.14em;letter-spacing:-.035em;color:#E9EDF1;white-space:nowrap;overflow:visible}
+.bf-word i{font-style:normal;color:#5470FF}
+.bf-row{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1.5rem 3rem;padding-top:1.5rem;border-top:1px solid rgba(245,247,249,.16)}
+.bf-def{margin:0;max-width:34rem;font-family:var(--font-mono,"IBM Plex Mono",monospace);font-size:.78rem;line-height:1.6;letter-spacing:.04em;color:#B4BDC8}
+.bf-def em{font-style:italic;color:#8D97A3;margin-right:.35rem}
+.bf-nav{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;font-family:var(--font-ui,"IBM Plex Sans",system-ui,sans-serif);font-size:.9rem}
+.bf-nav a{color:#D7DCE3;text-decoration:none;border-bottom:1px solid transparent;padding-bottom:1px;transition:color .2s,border-color .2s}
+.bf-nav a:hover,.bf-nav a:focus-visible{color:#fff;border-color:#fff;outline:none}
+.bf-note{margin:0;font-family:var(--font-mono,"IBM Plex Mono",monospace);font-size:.68rem;letter-spacing:.05em;color:#8D97A3}
+@media (max-width:560px){.bf-row{flex-direction:column;align-items:flex-start}}
+@media (min-width:1500px){.bf-in{max-width:80rem}.bf-word{font-size:calc(min(100vw - 3rem, 80rem) * 1.15 / (var(--n) + 1))}}
+/* ---------- slim floating header (added by build.py) ---------- */
+.top{position:sticky;top:.75rem;z-index:40;padding:.5rem .6rem .5rem 1.25rem;border:1px solid rgba(200,207,216,.9);border-radius:999px;background:rgba(245,247,249,.74);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px);box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 8px 24px -14px rgba(16,20,26,.28)}
+.top .word{font-size:1.45rem;line-height:1;letter-spacing:-.01em;text-decoration:none}
+.top .word::after{content:".";color:var(--accent,#2B4BF2)}
+.top .nav a:not(.go):hover{color:var(--ink)}
+.top .nav a.go{border-radius:999px;padding:.5rem 1.2rem}
+.page{overflow:clip}
+@media (max-width:640px){.top{border-radius:18px;padding:.5rem .75rem;top:.5rem;gap:.35rem}.top .nav{width:100%;flex-wrap:nowrap;overflow-x:auto;gap:.5rem;font-size:.74rem;justify-content:space-between;scrollbar-width:none}.top .nav::-webkit-scrollbar{display:none}.top .nav a.go{padding:.35rem .8rem}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="wrap">
+
+    <header class="top rise">
+      <a class="word" href="index.html">Reflex</a>
+      <nav class="nav" aria-label="Primary"><a href="about.html">What it is</a><a href="preview.html">Preview</a><a href="how.html">How it works</a><a href="privacy.html">Privacy</a><a class="go" href="upload.html" aria-current="page">Upload</a></nav>
+    </header>
+
+    <section class="rise" style="--d:.08s">
+      <h1 class="title">Send it. I’ll wait.</h1>
+      <p class="lede">Drop the ZIP exactly how Google sent it. I check it in your browser first. Nothing leaves your device until you say so.</p>
+    </section>
+
+    <section class="zone rise" id="zone" data-view="idle" style="--d:.16s" aria-live="polite">
+
+      <div class="view" data-v="idle">
+        <div class="drop" id="drop" role="button" tabindex="0" aria-label="Choose your Takeout ZIP file">
+          <span class="drop-ic"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 15V4M5.5 8.5L10 4l4.5 4.5M3 16.5h14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <h2>Drop your ZIP <em>here.</em></h2>
+          <p>Or <u>choose it from your computer</u>. It looks like <span class="mono">takeout-2026&hellip;-001.zip</span>.</p>
+        </div>
+        <input id="file" type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden>
+      </div>
+
+      <div class="view" data-v="busy">
+        <div class="panel-in">
+          <p class="file"><b id="busy-name">takeout.zip</b><span id="busy-size"></span></p>
+          <h2 class="head">Checking your file<em>&hellip;</em></h2>
+          <div class="bar" role="progressbar" aria-label="Checking your file"></div>
+          <p class="say">This happens in your browser. Nothing has been sent anywhere.</p>
+        </div>
+      </div>
+
+      <div class="view" data-v="reading">
+        <div class="stage" id="stage">
+          <canvas class="fx" id="fx" aria-hidden="true"></canvas>
+          <div class="stage-in">
+            <p class="file"><b id="g-name">takeout.zip</b><span id="g-size"></span></p>
+            <div class="pct" aria-hidden="true"><b id="g-pct">0</b><span>%</span></div>
+            <h2 class="head" id="g-head">Sending it over<em>&hellip;</em></h2>
+            <div class="bar det" role="progressbar" aria-label="Progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="g-bar"><i id="g-fill"></i></div>
+            <ol class="steps" id="g-steps">
+              <li data-s="send">Sending your file<span class="n"></span></li>
+              <li data-s="reading">Reading your history<span class="n"></span></li>
+              <li data-s="lookup">Looking up your videos<span class="n"></span></li>
+              <li data-s="measuring">Measuring your time<span class="n"></span></li>
+            </ol>
+            <p class="tease" id="g-tease" aria-hidden="true"></p>
+            <p class="say stage-say">Keep this tab open. Usually under a minute. <span class="fxhint">Meanwhile, move your cursor. Click to pop.</span></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="view" data-v="ready">
+        <div class="panel-in">
+          <p class="file"><b id="r-name">takeout.zip</b><span id="r-size"></span></p>
+          <h2 class="head" id="r-head">That&rsquo;s <em>a good one.</em></h2>
+          <p class="say" id="r-say">I found your history. Here is what is inside.</p>
+          <dl class="found">
+            <div><dt>Videos</dt><dd id="r-count">&ndash;</dd></div>
+            <div><dt>From</dt><dd id="r-from">&ndash;</dd></div>
+            <div><dt>To</dt><dd id="r-to">&ndash;</dd></div>
+          </dl>
+          <ul class="parts" id="r-parts"></ul>
+          <p class="warn" id="r-warn"></p>
+          <div class="acts">
+            <button class="enter" type="button" id="read"><span>Read my history</span><svg width="15" height="11" viewBox="0 0 15 11" fill="none" aria-hidden="true"><path d="M1 5.5h12M9 1.5l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button class="link" type="button" data-again>Choose a different file</button>
+          </div>
+          <p class="sendnote">Reading it sends the ZIP to my server. It is held in memory while I work and is never saved. <a href="privacy.html">The details</a>.</p>
+        </div>
+      </div>
+
+      <div class="view" data-v="problem">
+        <div class="panel-in">
+          <p class="file"><b id="p-name">takeout.zip</b><span id="p-size"></span></p>
+          <h2 class="head" id="p-head">Something&rsquo;s off.</h2>
+          <p class="say" id="p-say"></p>
+          <div class="acts">
+            <button class="enter" type="button" data-again><span>Try another file</span><svg width="15" height="11" viewBox="0 0 15 11" fill="none" aria-hidden="true"><path d="M1 5.5h12M9 1.5l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <a class="link" id="p-help" href="how.html">Back to the steps</a>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="trust rise" style="--d:.2s">
+      <p class="eyebrow">Before you drop it</p>
+      <ul>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><b>Not stored.</b><span>Your ZIP sits in memory while I work, then it&rsquo;s gone.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6"/><path d="M4 4l16 16"/></svg><b>No account.</b><span>No email, no Google password. Ever.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 7.6-8 9-4.8-1.4-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg><b>Never sold.</b><span>Not shared with advertisers, not used to train anything.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/><path d="M14 13l3 3m0-3l-3 3"/></svg><b>Stays in this tab.</b><span>Close it and your report is gone.</span></li>
+      </ul>
+      <p>Want the full version? <a href="privacy.html">Read the privacy page <span aria-hidden="true">&rarr;</span></a></p>
+    </section>
+
+    <section class="looks rise" style="--d:.24s">
+      <p class="eyebrow">What I look for</p>
+      <p>Your <b>watch history</b> as JSON, plus your <b>search history</b> and <b>subscriptions</b> if they&rsquo;re there. If Google split your export into several ZIPs, start with the first one.</p>
+    </section>
+
+  </div>
+</div>
+
+<footer class="bigfoot">
+  <div class="bf-in">
+    <p class="bf-word" style="--n:7" aria-label="release">release<i>.</i></p>
+    <div class="bf-row">
+      <p class="bf-def"><em>(v.)</em>to let go of something you’ve been holding. A ZIP, here.</p>
+      <div><nav class="bf-nav" aria-label="Footer"><a href="inspiration.html">Inspiration</a><a href="feedback.html">Feedback</a><a href="contact.html">Contact</a><a href="privacy.html">Privacy</a><a href="https://www.linkedin.com/in/fasterflash" target="_blank" rel="noopener noreferrer">LinkedIn &#8599;</a><a href="https://github.com/FasterFlash/reflex" target="_blank" rel="noopener noreferrer">GitHub &#8599;</a><a href="https://www.instagram.com/hmmmm__nothinglikethat/" target="_blank" rel="noopener noreferrer">Instagram &#8599;</a></nav>
+      <p class="bf-note" style="margin-top:1rem">Made by Tarun &middot; Not affiliated with YouTube or Google.</p></div>
+    </div>
+  </div>
+</footer>
+<div class="sheen" aria-hidden="true"></div>
+<div class="sweep arrive" aria-hidden="true"></div>
+
+<script src="jszip.min.js"></script>
+<script>
+(function(){
+  var MAX_BYTES = 300 * 1024 * 1024;       /* a YouTube-only export is far smaller */
+  var MAX_PARSE = 200 * 1024 * 1024;       /* don't try to JSON.parse more than this in the tab */
+  var THIN_DAYS = 30;
+
+  var $ = function(id){ return document.getElementById(id); };
+  var zone = $('zone'), drop = $('drop'), input = $('file');
+  var sheen = document.querySelector('.sheen'), sweep = document.querySelector('.sweep');
+
+  if (window.matchMedia('(hover:hover) and (pointer:fine)').matches){
+    window.addEventListener('pointermove', function(e){
+      sheen.style.setProperty('--x', e.clientX + 'px');
+      sheen.style.setProperty('--y', e.clientY + 'px');
+    }, {passive:true});
+  }
+  sweep.addEventListener('animationend', function(){ sweep.classList.remove('arrive'); });
+
+  var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function fmtDate(d){ return d.getUTCDate() + ' ' + MON[d.getUTCMonth()] + ' ' + d.getUTCFullYear(); }
+  function fmtSize(n){
+    if (n < 1024 * 1024) return Math.max(1, Math.round(n / 1024)) + ' KB';
+    if (n < 1024 * 1024 * 1024) return (n / 1048576).toFixed(n < 1e7 ? 1 : 0) + ' MB';
+    return (n / 1073741824).toFixed(1) + ' GB';
+  }
+
+  var PROBLEMS = {
+    notzip: { h: 'That isn\u2019t a <em>ZIP.</em>',
+      say: function(){ return 'I need the <b>.zip</b> Google emailed you. Don\u2019t unzip it first.'; }, help: null },
+    nodata: { h: 'I can\u2019t find your <em>YouTube history.</em>',
+      say: function(){ return 'The export may not have included YouTube. In step 3, deselect everything and tick only <b>YouTube</b>, then request it again.'; }, help: 'Back to the steps' },
+    html: { h: 'Your history came as <em>HTML.</em>',
+      say: function(){ return 'I can only read <b>JSON</b>. Request the export again and set the history format to JSON in step 3.'; }, help: 'Back to the steps' },
+    lookup: { h: 'I couldn\u2019t finish <em>the lookup.</em>',
+      say: function(m){ return m.message || 'I couldn\u2019t look up your videos on YouTube just now. Nothing was saved. Please try again later.'; }, help: null },
+    busy: { h: 'I\u2019m a bit <em>busy.</em>',
+      say: function(m){ return m.message || 'Try again in a minute.'; }, help: null },
+    internal: { h: 'Something <em>broke.</em>',
+      say: function(m){ return m.message || 'Something went wrong while reading your history. Nothing was saved.'; }, help: null },
+    offline: { h: 'I can\u2019t reach <em>the server.</em>',
+      say: function(){ return 'Your file was checked, but I couldn\u2019t send it. Make sure Reflex is running and try again.'; }, help: null },
+    big: { h: 'That file is much too <em>big.</em>',
+      say: function(m){ return 'A YouTube-only export is usually well under 100 MB. This one is <b>' + m.size + '</b>, so it probably holds more than YouTube. Request it again with only YouTube ticked.'; }, help: 'Back to the steps' }
+  };
+
+  function setView(v){ zone.setAttribute('data-view', v); zone.classList.remove('over'); }
+
+  /* ---- waiting-screen effects: reactive gradient, dot field, particles, counting percent ---- */
+  (function(){
+    var stage = $('stage'), cv = $('fx'); if (!stage || !cv || !cv.getContext) return;
+    var ctx = cv.getContext('2d'), W = 0, H = 0, dpr = 1, raf = 0, on = false;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    var ptr = { x: 0, y: 0, tx: 0, ty: 0, seen: false, lx: 0, ly: 0 }, parts = [], shown = 0, t0 = 0, teaseT = 0, teaseI = 0;
+    var BLOBS = [[43,75,242,.62,.21,.29,0,1.4,.50],[111,134,255,.5,.33,.19,2.1,.4,.38],[99,66,235,.55,.17,.26,4.2,2.6,.34],[34,150,243,.42,.29,.37,1.1,3.3,.28]];
+    var TEASE = ['Counting your Shorts, one flick at a time.','Looking for your longest streak of days in a row.','Working out your alter ego.','Finding the hour you are most awake.','Hunting for your longest single sitting.','Checking if you ever took a day off.','Sorting channels by time, not plays.','Working out where your hours really go.'];
+
+    function size(){
+      var r = stage.getBoundingClientRect(); if (!r.width) return;
+      dpr = Math.min(2, window.devicePixelRatio || 1); W = r.width; H = r.height;
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (!ptr.seen){ ptr.x = ptr.tx = W * .7; ptr.y = ptr.ty = H * .35; }
+    }
+    function local(e){ var r = stage.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+    function spawn(x, y, n, spd){
+      for (var i = 0; i < n && parts.length < 260; i++){
+        var a = Math.random() * 6.283, v = (spd || .6) * (.4 + Math.random());
+        parts.push({ x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - .15, life: 1, d: .008 + Math.random() * .014, r: 1.5 + Math.random() * 3.2, c: Math.random() < .5 ? '143,162,255' : (Math.random() < .5 ? '184,196,255' : '111,134,255') });
+      }
+    }
+    function move(e){
+      var p = local(e); if (p[0] < -40 || p[1] < -40 || p[0] > W + 40 || p[1] > H + 40) return;
+      ptr.tx = p[0]; ptr.ty = p[1]; ptr.seen = true;
+      var dx = p[0] - ptr.lx, dy = p[1] - ptr.ly;
+      if (dx * dx + dy * dy > 324){ spawn(p[0], p[1], 2, .5); ptr.lx = p[0]; ptr.ly = p[1]; }
+    }
+    function down(e){ var p = local(e); ptr.tx = p[0]; ptr.ty = p[1]; ptr.seen = true; spawn(p[0], p[1], 34, 3.2); ring.push({ x: p[0], y: p[1], r: 6, a: .8 }); }
+    var ring = [];
+
+    function target(){ var w = parseFloat($('g-fill').style.width); return isNaN(w) ? 0 : w; }
+    function paintPct(){ var el = $('g-pct'); if (el) el.textContent = Math.round(shown); }
+
+    function draw(ts){
+      raf = on ? requestAnimationFrame(draw) : 0;
+      var t = (ts - t0) / 1000;
+      ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = '#0B0F16'; ctx.fillRect(0, 0, W, H);
+      ctx.globalCompositeOperation = 'lighter';
+      var m = Math.max(W, H);
+      BLOBS.forEach(function(b){
+        var x = W * (.5 + .38 * Math.sin(t * b[4] + b[6])), y = H * (.5 + .34 * Math.cos(t * b[5] + b[7])), r = m * b[3];
+        var g = ctx.createRadialGradient(x, y, 0, x, y, r);
+        g.addColorStop(0, 'rgba(' + b[0] + ',' + b[1] + ',' + b[2] + ',' + b[8] + ')'); g.addColorStop(1, 'rgba(' + b[0] + ',' + b[1] + ',' + b[2] + ',0)');
+        ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      });
+      /* the cursor: a lagging light, plus a lazy orbit when nobody is moving */
+      if (!ptr.seen){ ptr.tx = W * (.5 + .3 * Math.cos(t * .5)); ptr.ty = H * (.45 + .25 * Math.sin(t * .7)); }
+      ptr.x += (ptr.tx - ptr.x) * .09; ptr.y += (ptr.ty - ptr.y) * .09;
+      var pr = Math.max(180, m * .24), pg = ctx.createRadialGradient(ptr.x, ptr.y, 0, ptr.x, ptr.y, pr);
+      pg.addColorStop(0, 'rgba(190,205,255,.55)'); pg.addColorStop(.35, 'rgba(111,134,255,.28)'); pg.addColorStop(1, 'rgba(43,75,242,0)');
+      ctx.fillStyle = pg; ctx.fillRect(0, 0, W, H);
+      /* a field of dots that swell as the light passes */
+      var S = 30, R = 170;
+      for (var gx = S / 2; gx < W; gx += S){
+        if (Math.abs(gx - ptr.x) > R) { continue; }
+        for (var gy = S / 2; gy < H; gy += S){
+          var dx = gx - ptr.x, dy = gy - ptr.y, d2 = dx * dx + dy * dy; if (d2 > R * R) continue;
+          var k = 1 - Math.sqrt(d2) / R; ctx.fillStyle = 'rgba(210,220,255,' + (.08 + .6 * k * k).toFixed(3) + ')';
+          ctx.beginPath(); ctx.arc(gx, gy, .8 + 2.1 * k, 0, 6.283); ctx.fill();
+        }
+      }
+      /* particles */
+      for (var i = parts.length - 1; i >= 0; i--){
+        var p = parts[i]; p.x += p.vx; p.y += p.vy; p.vx *= .97; p.vy = p.vy * .97 + .006; p.life -= p.d;
+        if (p.life <= 0){ parts.splice(i, 1); continue; }
+        var gr = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
+        gr.addColorStop(0, 'rgba(' + p.c + ',' + (.9 * p.life).toFixed(3) + ')'); gr.addColorStop(1, 'rgba(' + p.c + ',0)');
+        ctx.fillStyle = gr; ctx.fillRect(p.x - p.r * 4, p.y - p.r * 4, p.r * 8, p.r * 8);
+      }
+      for (var j = ring.length - 1; j >= 0; j--){
+        var q = ring[j]; q.r += 5; q.a -= .02; if (q.a <= 0){ ring.splice(j, 1); continue; }
+        ctx.strokeStyle = 'rgba(184,196,255,' + q.a.toFixed(3) + ')'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(q.x, q.y, q.r, 0, 6.283); ctx.stroke();
+      }
+      /* the percentage counts up toward the real progress, never past it */
+      var tg = target(); shown += (tg - shown) * .08; if (Math.abs(tg - shown) < .05) shown = tg; paintPct();
+    }
+
+    function nextTease(){
+      var el = $('g-tease'); if (!el) return;
+      el.classList.add('out');
+      setTimeout(function(){ teaseI = (teaseI + 1) % TEASE.length; el.textContent = TEASE[teaseI]; el.classList.remove('out'); }, 460);
+    }
+    function start(){
+      if (on) return; on = true; size(); t0 = performance.now(); shown = Math.max(0, Math.min(shown, target()));
+      var el = $('g-tease'); if (el){ teaseI = Math.floor(Math.random() * TEASE.length); el.textContent = TEASE[teaseI]; el.classList.remove('out'); }
+      window.addEventListener('pointermove', move, { passive: true });
+      stage.addEventListener('pointerdown', down);
+      if (reduce){ draw(performance.now()); on = false; shown = target(); paintPct(); return; }
+      teaseT = setInterval(nextTease, 2800);
+      raf = requestAnimationFrame(draw);
+    }
+    function stop(){
+      on = false; if (raf) cancelAnimationFrame(raf); raf = 0; clearInterval(teaseT);
+      window.removeEventListener('pointermove', move); stage.removeEventListener('pointerdown', down); parts.length = 0; ring.length = 0;
+    }
+    window.addEventListener('resize', function(){ if (on) size(); });
+    /* react to the view switching, so nothing else needs to know about this */
+    function sync(){ if (zone.getAttribute('data-view') === 'reading') start(); else stop(); }
+    new MutationObserver(sync).observe(zone, { attributes: true, attributeFilter: ['data-view'] });
+    sync();
+  })();
+
+  function showProblem(key, meta){
+    var P = PROBLEMS[key];
+    $('p-name').textContent = meta.name; $('p-size').textContent = meta.size;
+    $('p-head').innerHTML = P.h;
+    $('p-say').innerHTML = P.say(meta);
+    var help = $('p-help');
+    help.hidden = !P.help;
+    if (P.help) help.textContent = P.help;
+    setView('problem');
+  }
+
+  function showReady(meta){
+    $('r-name').textContent = meta.name; $('r-size').textContent = meta.size;
+    $('r-count').textContent = meta.count != null ? meta.count.toLocaleString('en-US') : '\u2013';
+    $('r-from').textContent = meta.from ? fmtDate(meta.from) : '\u2013';
+    $('r-to').textContent = meta.to ? fmtDate(meta.to) : '\u2013';
+    var days = (meta.from && meta.to) ? Math.round((meta.to - meta.from) / 864e5) + 1 : null;
+    var thin = days != null && days < THIN_DAYS;
+    zone.classList.toggle('thin', thin);
+    $('r-warn').innerHTML = thin ? '<b>There\u2019s not much history here.</b> It only goes back ' + days + ' days, so your report will be thin. If you expected more, Google may have auto-deleted the rest.' : '';
+    $('r-head').innerHTML = thin ? 'I can read it. <em>It\u2019s short.</em>' : 'That\u2019s <em>a good one.</em>';
+    $('r-say').textContent = thin ? 'Here is what is inside.' : 'I found your history. Here is what is inside.';
+    $('r-parts').innerHTML =
+      '<li>Watch history</li>' +
+      '<li' + (meta.search ? '' : ' class="off"') + '>Search history' + (meta.search ? '' : ' (not found)') + '</li>' +
+      '<li' + (meta.subs ? '' : ' class="off"') + '>Subscriptions' + (meta.subs ? '' : ' (not found)') + '</li>';
+    setView('ready');
+  }
+
+  var current = null;
+  function inspect(file){
+    current = file;
+    var meta = { name: file.name, size: fmtSize(file.size) };
+    $('busy-name').textContent = meta.name; $('busy-size').textContent = meta.size;
+    setView('busy');
+
+    if (!/\.zip$/i.test(file.name) && file.type.indexOf('zip') < 0) return showProblem('notzip', meta);
+    if (file.size > MAX_BYTES) return showProblem('big', meta);
+    if (!window.JSZip){ meta.count = null; return showReady(meta); }   /* offline: can't look inside */
+
+    var t0 = Date.now();
+    JSZip.loadAsync(file).then(function(zip){
+      var names = Object.keys(zip.files);
+      var watch = names.filter(function(n){ return /history\/watch-history\.json$/i.test(n); })[0];
+      var watchHtml = names.filter(function(n){ return /history\/watch-history\.html$/i.test(n); })[0];
+      meta.search = names.some(function(n){ return /history\/search-history\.json$/i.test(n); });
+      meta.subs = names.some(function(n){ return /subscriptions\/subscriptions\.csv$/i.test(n); });
+      if (!watch && watchHtml) return 'html';
+      if (!watch) return 'nodata';
+      var entry = zip.files[watch];
+      if (entry._data && entry._data.uncompressedSize > MAX_PARSE){ return 'ok'; }
+      return entry.async('string').then(function(txt){
+        var rows = JSON.parse(txt), min = Infinity, max = -Infinity;
+        rows.forEach(function(r){
+          var t = Date.parse(r.time);
+          if (t < min) min = t; if (t > max) max = t;
+        });
+        meta.count = rows.length;
+        if (isFinite(min)){ meta.from = new Date(min); meta.to = new Date(max); }
+        return rows.length ? 'ok' : 'nodata';
+      });
+    }).then(function(result){
+      var wait = Math.max(0, 700 - (Date.now() - t0));     /* never flash the checking screen */
+      setTimeout(function(){
+        if (result === 'ok') showReady(meta); else showProblem(result, meta);
+      }, wait);
+    }).catch(function(){ showProblem('notzip', meta); });
+  }
+
+  /* picking a file */
+  function pick(){ input.click(); }
+  drop.addEventListener('click', pick);
+  drop.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); pick(); } });
+  input.addEventListener('change', function(){ if (input.files[0]) inspect(input.files[0]); input.value = ''; });
+
+  ['dragenter','dragover'].forEach(function(t){
+    zone.addEventListener(t, function(e){
+      if (zone.getAttribute('data-view') !== 'idle') return;
+      e.preventDefault(); zone.classList.add('over');
+    });
+  });
+  ['dragleave','drop'].forEach(function(t){
+    zone.addEventListener(t, function(e){
+      if (t === 'dragleave' && zone.contains(e.relatedTarget)) return;
+      zone.classList.remove('over');
+    });
+  });
+  zone.addEventListener('drop', function(e){
+    e.preventDefault();
+    if (zone.getAttribute('data-view') !== 'idle') return;
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) inspect(f);
+  });
+  /* a file dropped outside the box would otherwise open in the tab */
+  window.addEventListener('dragover', function(e){ e.preventDefault(); });
+  window.addEventListener('drop', function(e){ e.preventDefault(); });
+
+  document.querySelectorAll('[data-again]').forEach(function(b){
+    b.addEventListener('click', function(){ zone.classList.remove('thin'); setView('idle'); drop.focus(); });
+  });
+
+  /* the one signature interaction, then the real thing */
+  var go = $('read');
+  var STEP_ORDER = ['send','reading','lookup','measuring'];
+  var HEADS = { send: 'Sending it over', reading: 'Reading your history', lookup: 'Looking up your videos', measuring: 'Measuring your time' };
+  var busyNow = false;
+
+  function showStep(stage, done, total, pct){
+    var at = STEP_ORDER.indexOf(stage);
+    $('g-head').innerHTML = HEADS[stage] + '<em>&hellip;</em>';
+    document.querySelectorAll('#g-steps li').forEach(function(li, i){
+      li.className = i < at ? 'past' : (i === at ? 'now' : '');
+      var n = li.querySelector('.n');
+      n.textContent = (i === at && total) ? done.toLocaleString('en-US') + ' / ' + total.toLocaleString('en-US') : '';
+    });
+    var p = pct != null ? pct : (stage === 'lookup' && total ? 12 + 78 * (done / total) : at * 12 + 4);
+    $('g-fill').style.width = Math.max(3, Math.min(100, p)) + '%';
+    $('g-bar').setAttribute('aria-valuenow', Math.round(p));
+  }
+
+  function fail(code, message){
+    busyNow = false;
+    showProblem(PROBLEMS[code] ? code : 'internal',
+      { name: current ? current.name : '', size: current ? fmtSize(current.size) : '', message: message });
+  }
+
+  function poll(id){
+    var tries = 0;
+    (function tick(){
+      fetch('/api/jobs/' + id).then(function(r){ return r.json(); }).then(function(s){
+        if (s.error && !s.state) return fail('internal', s.error.message);
+        if (s.state === 'error') return fail(s.error.code, s.error.message);
+        if (s.state === 'done'){
+          showStep('measuring', 0, 0, 100);
+          return fetch('/api/jobs/' + id + '/report').then(function(r){
+            if (!r.ok) throw new Error('gone');
+            return r.text();
+          }).then(function(txt){
+            try { sessionStorage.setItem('reflex.report', txt); } catch (e) { /* private mode: the report page will say so */ }
+            window.location.href = 'report.html';
+          });
+        }
+        showStep(s.stage, s.done, s.total);
+        setTimeout(tick, 600);
+      }).catch(function(){
+        if (++tries > 5) return fail('offline');
+        setTimeout(tick, 1200);
+      });
+    })();
+  }
+
+  function send(){
+    $('g-name').textContent = current.name; $('g-size').textContent = fmtSize(current.size);
+    showStep('send', 0, 0, 2);
+    setView('reading');
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/upload');
+    xhr.setRequestHeader('Content-Type', 'application/zip');
+    xhr.upload.onprogress = function(e){
+      if (e.lengthComputable) showStep('send', 0, 0, 2 + 8 * (e.loaded / e.total));
+    };
+    xhr.onerror = function(){ fail('offline'); };
+    xhr.onload = function(){
+      var body = null;
+      try { body = JSON.parse(xhr.responseText); } catch (e) { /* not JSON */ }
+      if (xhr.status === 200 && body && body.id) return poll(body.id);
+      if (body && body.error) return fail(body.error.code, body.error.message);
+      fail('internal');
+    };
+    xhr.send(current);
+  }
+
+  go.addEventListener('click', function(){
+    if (busyNow || !current) return;
+    busyNow = true;
+    go.classList.remove('is-pressed'); sweep.classList.remove('arrive','run'); void sweep.offsetWidth;
+    go.classList.add('is-pressed'); sweep.classList.add('run');
+    setTimeout(function(){ go.classList.remove('is-pressed'); }, 640);
+    setTimeout(function(){ sweep.classList.remove('run'); send(); }, 700);
+  });
+})();
+</script>
+
+</body>
+</html>

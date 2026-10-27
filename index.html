@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>*,*::before,*::after{box-sizing:border-box}:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Reflex</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+
+<style>
+/* Layout: one full-height entry moment, left-anchored on a cool pale ground.
+   Deliberately single-theme (light), near-monochrome at rest; the accent only
+   appears in light — the focus ring and the glint on press. */
+:root{
+  --paper:#F5F7F9;
+  --ground:#E7EAEF;
+  --ground-deep:#D7DCE3;
+  --ink:#10141A;
+  --ink-soft:#58626D;
+  --ink-faint:#949EA9;
+  --line:#C8CFD8;
+  --accent:#2B4BF2;
+
+  --font-display:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --font-ui:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+
+  --ease:cubic-bezier(.16,.84,.32,1);
+}
+
+html,body{height:100%}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--font-ui);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- stage ---------- */
+
+.stage{
+  position:relative;
+  isolation:isolate;
+  min-height:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  overflow:hidden;
+  padding-left:max(1.5rem,env(safe-area-inset-left,0px));
+  padding-right:max(1.5rem,env(safe-area-inset-right,0px));
+  padding-block:clamp(2.5rem,9vh,5rem) 2.75rem;
+  background:linear-gradient(180deg,var(--paper) 0%,var(--ground) 46%,var(--ground-deep) 100%);
+}
+
+/* slow ambient drift — a polished surface catching light, barely there */
+.stage::before{
+  content:"";
+  position:absolute;
+  inset:-30% -10%;
+  z-index:-1;
+  background:radial-gradient(42% 46% at 30% 36%,rgba(255,255,255,.95),rgba(255,255,255,0) 68%);
+  opacity:.75;
+  animation:drift 26s var(--ease) infinite alternate;
+}
+@keyframes drift{
+  from{transform:translate3d(-4%,-2%,0) scale(1)}
+  to{transform:translate3d(10%,6%,0) scale(1.12)}
+}
+
+.frame{
+  margin-left:clamp(0rem,4vw,5rem);
+  max-width:46rem;
+  min-width:0;
+}
+
+/* ---------- wordmark + reflection ---------- */
+
+.brand{margin-bottom:clamp(2rem,4.5vw,3rem)}
+
+.mark{
+  font-family:var(--font-display);
+  font-weight:400;
+  font-size:clamp(3.75rem,13vw,9.5rem);
+  line-height:.86;
+  letter-spacing:-.025em;
+  margin:0;
+  color:var(--ink);
+  text-wrap:balance;
+}
+
+/* ---------- copy ---------- */
+
+.line{
+  font-family:var(--font-display);
+  font-size:clamp(1.5rem,3.4vw,2.35rem);
+  line-height:1.2;
+  letter-spacing:-.01em;
+  margin:0 0 .9rem;
+  color:var(--ink);
+  text-wrap:balance;
+}
+.line em{font-style:italic;color:var(--ink)}
+
+.sub{
+  font-size:clamp(.9rem,1.4vw,1rem);
+  line-height:1.5;
+  color:var(--ink-soft);
+  margin:0 0 clamp(1.75rem,3.5vw,2.5rem);
+  max-width:48ch;
+}
+
+/* ---------- enter ---------- */
+
+.enter{
+  position:relative;
+  overflow:hidden;
+  display:inline-flex;
+  align-items:center;
+  gap:.6rem;
+  font-family:var(--font-ui);
+  font-size:.9rem;
+  font-weight:500;
+  letter-spacing:.005em;
+  color:var(--paper);
+  background:var(--ink);
+  border:1px solid var(--ink);
+  border-radius:3px;
+  padding:.8rem 1.35rem;
+  cursor:pointer;
+  text-decoration:none;
+  transition:background .25s var(--ease),transform .25s var(--ease);
+}
+.enter:hover{background:#000;transform:translateY(-1px)}
+.enter:active{transform:translateY(0)}
+.enter:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.enter svg{flex:none;transition:transform .3s var(--ease)}
+.enter:hover svg{transform:translateX(3px)}
+
+/* the one signature micro-interaction: light crossing the surface on press */
+.enter::after{
+  content:"";
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:-60%;
+  width:45%;
+  pointer-events:none;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.55) 42%,rgba(126,152,255,.75) 52%,transparent);
+  opacity:0;
+}
+.enter.is-pressed::after{animation:glint .6s var(--ease)}
+@keyframes glint{
+  0%{opacity:1;transform:translateX(0)}
+  100%{opacity:1;transform:translateX(360%)}
+}
+
+.top{
+  display:flex;
+  justify-content:flex-end;
+  margin-bottom:clamp(1.5rem,5vw,2.5rem);
+  animation:fade 1s var(--ease) .9s both;
+}
+@media (max-width:700px){
+  .top{justify-content:flex-start;margin-left:clamp(0rem,4vw,5rem)}
+}
+
+/* ---------- nav (shared by every screen) ---------- */
+.nav{display:flex;align-items:center;flex-wrap:wrap;gap:.35rem 1.5rem;font-family:var(--font-ui);font-size:.85rem}
+.nav a,.nav .soon{position:relative;padding:.3rem 0;color:var(--ink-soft);text-decoration:none;white-space:nowrap}
+.nav a{transition:color .2s}
+.nav a:hover,.nav a[aria-current="page"]{color:var(--ink)}
+.nav a[aria-current="page"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:var(--ink)}
+.nav a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+.nav .soon{color:var(--ink-faint,#949EA9);cursor:default}
+.nav small{margin-left:.4rem;font-family:var(--font-mono);font-size:.58rem;letter-spacing:.07em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:.08rem .38rem;vertical-align:.1em}
+
+/* ---------- footer note ---------- */
+
+.defn{
+  margin:auto 0 0;
+  padding-top:3rem;
+  margin-left:clamp(0rem,4vw,5rem);
+  font-family:var(--font-mono);
+  font-size:.7rem;
+  letter-spacing:.06em;
+  color:var(--ink-faint);
+}
+.defn b{font-weight:400;color:var(--ink-soft)}
+.defn-note{display:block;margin-top:.45rem}
+.defn i{font-style:italic}
+
+/* ---------- surface light ---------- */
+
+.sheen{
+  position:fixed;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+  opacity:0;
+  background:radial-gradient(260px 260px at var(--x,50%) var(--y,50%),rgba(255,255,255,.5),rgba(255,255,255,0) 70%);
+  transition:opacity .4s var(--ease);
+}
+@media (hover:hover) and (pointer:fine){ .sheen{opacity:1} }
+
+.sweep{
+  position:fixed;
+  inset:0;
+  z-index:3;
+  pointer-events:none;
+  opacity:0;
+  background:linear-gradient(104deg,transparent 36%,rgba(255,255,255,.9) 50%,transparent 64%);
+  transform:translateX(-120%);
+}
+.sweep.run{animation:sweep .95s cubic-bezier(.4,0,.2,1)}
+@keyframes sweep{
+  0%{opacity:1;transform:translateX(-120%)}
+  100%{opacity:1;transform:translateX(120%)}
+}
+
+/* ---------- entrance sequence ---------- */
+
+@keyframes rise{
+  from{opacity:0;transform:translateY(16px)}
+  to{opacity:1;transform:none}
+}
+@keyframes fade{ from{opacity:0} to{opacity:1} }
+
+.mark{animation:rise .8s var(--ease) .05s both}
+.line{animation:rise .8s var(--ease) .34s both}
+.sub{animation:rise .8s var(--ease) .48s both}
+.enter{animation:rise .8s var(--ease) .6s both}
+.defn{animation:fade 1s var(--ease) .78s both}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001s!important;
+    animation-delay:0s!important;
+    animation-iteration-count:1!important;
+    transition-duration:.001s!important;
+  }
+  .stage::before{animation:none}
+}
+
+@media (max-width:520px){
+  .defn{padding-top:2.25rem;font-size:.66rem}
+  .sub{max-width:30ch}
+}
+
+
+/* ---------- gentle interaction: a light that follows you, a wordmark that leans in ---------- */
+.fx{position:absolute;inset:0;width:100%;height:100%;z-index:-1;display:block;pointer-events:none}
+.mark .ch{display:inline-block;will-change:transform;transition:none}
+.might{display:flex;align-items:baseline;flex-wrap:wrap;gap:.2rem .7rem;margin:-.9rem 0 clamp(1.5rem,3vw,2.1rem);font-family:var(--font-mono);font-size:.72rem;letter-spacing:.05em;color:var(--ink-faint);animation:fade 1s var(--ease) .75s both}
+.might em{font-family:var(--font-display);font-style:italic;font-size:clamp(1.15rem,2.2vw,1.45rem);letter-spacing:-.005em;color:var(--ink-soft);transition:opacity .45s var(--ease),transform .45s var(--ease)}
+.might em.out{opacity:0;transform:translateY(.35rem)}
+.enter{translate:var(--mx,0) var(--my,0)}
+.ring-fx{position:fixed;z-index:3;pointer-events:none;width:12px;height:12px;margin:-6px 0 0 -6px;border:1.5px solid rgba(43,75,242,.55);border-radius:50%;animation:ringfx .9s var(--ease) forwards}
+@keyframes ringfx{to{transform:scale(11);opacity:0}}
+@media (prefers-reduced-motion:reduce){.ring-fx{display:none}.might em{transition:none}}
+@media (min-width:1500px){html{font-size:112.5%}}
+@media (min-width:1900px){html{font-size:125%}}
+@media (min-width:2500px){html{font-size:150%}}
+
+/* ---------- big footer (added by build.py, same on every page) ---------- */
+.bigfoot{position:relative;z-index:60;isolation:isolate;overflow:hidden;background:var(--ink,#10141A);color:var(--paper,#F5F7F9);padding:clamp(3rem,6vw,5rem) max(1.5rem,env(safe-area-inset-right,0px)) 2rem max(1.5rem,env(safe-area-inset-left,0px))}
+.bigfoot::before{content:"";position:absolute;z-index:-1;inset:-40% -10% auto 35%;height:140%;background:radial-gradient(50% 50% at 70% 20%,rgba(84,112,255,.32),rgba(84,112,255,0) 70%);pointer-events:none}
+.bf-in{max-width:68rem;margin-inline:auto;display:flex;flex-direction:column;gap:clamp(1.5rem,3.5vw,2.75rem)}
+.bf-word{margin:0;font-family:var(--font-display,"Instrument Serif",Georgia,serif);font-weight:400;font-size:calc(min(100vw - 3rem, 68rem) * 1.15 / (var(--n) + 1));line-height:.88;padding-bottom:.14em;letter-spacing:-.035em;color:#E9EDF1;white-space:nowrap;overflow:visible}
+.bf-word i{font-style:normal;color:#5470FF}
+.bf-row{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1.5rem 3rem;padding-top:1.5rem;border-top:1px solid rgba(245,247,249,.16)}
+.bf-def{margin:0;max-width:34rem;font-family:var(--font-mono,"IBM Plex Mono",monospace);font-size:.78rem;line-height:1.6;letter-spacing:.04em;color:#B4BDC8}
+.bf-def em{font-style:italic;color:#8D97A3;margin-right:.35rem}
+.bf-nav{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;font-family:var(--font-ui,"IBM Plex Sans",system-ui,sans-serif);font-size:.9rem}
+.bf-nav a{color:#D7DCE3;text-decoration:none;border-bottom:1px solid transparent;padding-bottom:1px;transition:color .2s,border-color .2s}
+.bf-nav a:hover,.bf-nav a:focus-visible{color:#fff;border-color:#fff;outline:none}
+.bf-note{margin:0;font-family:var(--font-mono,"IBM Plex Mono",monospace);font-size:.68rem;letter-spacing:.05em;color:#8D97A3}
+@media (max-width:560px){.bf-row{flex-direction:column;align-items:flex-start}}
+@media (min-width:1500px){.bf-in{max-width:80rem}.bf-word{font-size:calc(min(100vw - 3rem, 80rem) * 1.15 / (var(--n) + 1))}}
+/* ---------- slim floating header (added by build.py) ---------- */
+.top{position:sticky;top:.75rem;z-index:40;padding:.5rem .6rem .5rem 1.25rem;border:1px solid rgba(200,207,216,.9);border-radius:999px;background:rgba(245,247,249,.74);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px);box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 8px 24px -14px rgba(16,20,26,.28)}
+.top .word{font-size:1.45rem;line-height:1;letter-spacing:-.01em;text-decoration:none}
+.top .word::after{content:".";color:var(--accent,#2B4BF2)}
+.top .nav a:not(.go):hover{color:var(--ink)}
+.top .nav a.go{border-radius:999px;padding:.5rem 1.2rem}
+.page{overflow:clip}
+@media (max-width:640px){.top{border-radius:18px;padding:.5rem .75rem;top:.5rem;gap:.35rem}.top .nav{width:100%;flex-wrap:nowrap;overflow-x:auto;gap:.5rem;font-size:.74rem;justify-content:space-between;scrollbar-width:none}.top .nav::-webkit-scrollbar{display:none}.top .nav a.go{padding:.35rem .8rem}}
+</style>
+</head>
+<body>
+<main class="stage">
+  <canvas class="fx" id="fx" aria-hidden="true"></canvas>
+  <div class="frame">
+    <div class="brand">
+      <h1 class="mark" id="mark" aria-label="Reflex">Reflex</h1>
+    </div>
+
+    <p class="line">You weren&rsquo;t paying attention.<br><em>I was.</em></p>
+    <p class="sub">Your watch history, read back to you. Unfiltered.</p>
+
+    <p class="might" aria-hidden="true"><span>it might say</span><em id="might">Your peak hour is 10 pm.</em></p>
+
+    <a class="enter" id="enter" href="about.html">
+      <span>Show me</span>
+      <svg width="15" height="11" viewBox="0 0 15 11" fill="none" aria-hidden="true">
+        <path d="M1 5.5h12M9 1.5l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+  </div>
+</main>
+
+<footer class="bigfoot">
+  <div class="bf-in">
+    <p class="bf-word" style="--n:6" aria-label="reflex">reflex<i>.</i></p>
+    <div class="bf-row">
+      <p class="bf-def"><em>(n.)</em>a response made without conscious thought.</p>
+      <div><nav class="bf-nav" aria-label="Footer"><a href="inspiration.html">Inspiration</a><a href="feedback.html">Feedback</a><a href="contact.html">Contact</a><a href="privacy.html">Privacy</a><a href="https://www.linkedin.com/in/fasterflash" target="_blank" rel="noopener noreferrer">LinkedIn &#8599;</a><a href="https://github.com/FasterFlash/reflex" target="_blank" rel="noopener noreferrer">GitHub &#8599;</a><a href="https://www.instagram.com/hmmmm__nothinglikethat/" target="_blank" rel="noopener noreferrer">Instagram &#8599;</a></nav>
+      <p class="bf-note" style="margin-top:1rem">Made by Tarun &middot; Not affiliated with YouTube or Google.</p></div>
+    </div>
+  </div>
+</footer>
+<div class="sheen" aria-hidden="true"></div>
+<div class="sweep" aria-hidden="true"></div>
+
+<script>
+(function(){
+  var sheen = document.querySelector('.sheen');
+  var sweep = document.querySelector('.sweep');
+  var btn   = document.getElementById('enter');
+
+  if (window.matchMedia('(hover:hover) and (pointer:fine)').matches){
+    window.addEventListener('pointermove', function(e){
+      sheen.style.setProperty('--x', e.clientX + 'px');
+      sheen.style.setProperty('--y', e.clientY + 'px');
+    }, {passive:true});
+  }
+
+  btn.addEventListener('click', function(e){
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+    e.preventDefault();
+    if (btn.dataset.busy) return;
+    btn.dataset.busy = '1';
+
+    btn.classList.add('is-pressed');
+    sweep.classList.remove('run');
+    void sweep.offsetWidth;          /* restart the animation */
+    sweep.classList.add('run');
+
+    setTimeout(function(){ btn.classList.remove('is-pressed'); }, 640);
+    /* leave while the glare is crossing the middle, so the next screen picks it up */
+    setTimeout(function(){ window.location.href = btn.getAttribute('href'); }, 480);
+    setTimeout(function(){
+      sweep.classList.remove('run');
+      delete btn.dataset.busy;
+    }, 1000);
+  });
+
+  /* ---- the entry moment: a soft light and dot field that follow the cursor, letters that lean toward it,
+          a button that leans back, and a ring where you click. Quiet on purpose. ---- */
+  (function(){
+    var stage = document.querySelector('.stage'), cv = document.getElementById('fx'), mark = document.getElementById('mark');
+    if (!stage || !cv || !cv.getContext) return;
+    var ctx = cv.getContext('2d'), W = 0, H = 0, dpr = 1, base = null;
+    var reduce = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    var fine = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+    var ptr = { x: 0, y: 0, tx: 0, ty: 0, seen: false, lx: 0, ly: 0 }, parts = [], letters = [], t0 = performance.now();
+    var INK = [16, 20, 26], ACC = [43, 75, 242];
+
+    /* split the wordmark into letters (the h1 keeps its aria-label) */
+    var word = mark.textContent;
+    mark.textContent = '';
+    for (var i = 0; i < word.length; i++){
+      var sp = document.createElement('span'); sp.className = 'ch'; sp.setAttribute('aria-hidden', 'true'); sp.textContent = word[i];
+      mark.appendChild(sp); letters.push({ el: sp, cx: 0, cy: 0, k: 0 });
+    }
+    function measure(){
+      var sx = window.scrollX, sy = window.scrollY;
+      letters.forEach(function(L){ var r = L.el.getBoundingClientRect(); L.cx = r.left + r.width / 2 + sx; L.cy = r.top + r.height / 2 + sy; });
+    }
+    function size(){
+      var r = stage.getBoundingClientRect(); dpr = Math.min(2, window.devicePixelRatio || 1);
+      W = r.width; H = r.height; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      /* the faint resting grid is drawn once */
+      base = document.createElement('canvas'); base.width = cv.width; base.height = cv.height;
+      var b = base.getContext('2d'); b.setTransform(dpr, 0, 0, dpr, 0, 0); b.fillStyle = 'rgba(16,20,26,.07)';
+      for (var x = 17; x < W; x += 34) for (var y = 17; y < H; y += 34){ b.beginPath(); b.arc(x, y, 1, 0, 6.283); b.fill(); }
+      if (!ptr.seen){ ptr.x = ptr.tx = W * .62; ptr.y = ptr.ty = H * .4; }
+      measure();
+    }
+    function mix(a, b, k){ return Math.round(a + (b - a) * k); }
+
+    function frame(ts){
+      requestAnimationFrame(frame);
+      var t = (ts - t0) / 1000;
+      ctx.clearRect(0, 0, W, H);
+      if (base) ctx.drawImage(base, 0, 0, W, H);
+      if (!ptr.seen){ ptr.tx = W * (.62 + .12 * Math.cos(t * .35)); ptr.ty = H * (.42 + .14 * Math.sin(t * .5)); }
+      ptr.x += (ptr.tx - ptr.x) * .08; ptr.y += (ptr.ty - ptr.y) * .08;
+      /* the light: a pale blue wash that trails the cursor */
+      var R = Math.max(260, Math.max(W, H) * .26), g = ctx.createRadialGradient(ptr.x, ptr.y, 0, ptr.x, ptr.y, R);
+      g.addColorStop(0, 'rgba(96,126,255,.20)'); g.addColorStop(.5, 'rgba(96,126,255,.07)'); g.addColorStop(1, 'rgba(96,126,255,0)');
+      ctx.fillStyle = g; ctx.fillRect(ptr.x - R, ptr.y - R, R * 2, R * 2);
+      /* dots that wake up near it */
+      var S = 34, D = 190, x0 = Math.max(17, Math.floor((ptr.x - D) / S) * S + 17), y0 = Math.max(17, Math.floor((ptr.y - D) / S) * S + 17);
+      for (var gx = x0; gx < Math.min(W, ptr.x + D); gx += S){
+        for (var gy = y0; gy < Math.min(H, ptr.y + D); gy += S){
+          var dx = gx - ptr.x, dy = gy - ptr.y, d2 = dx * dx + dy * dy; if (d2 > D * D) continue;
+          var k = 1 - Math.sqrt(d2) / D;
+          ctx.fillStyle = 'rgba(43,75,242,' + (.12 + .55 * k * k).toFixed(3) + ')';
+          ctx.beginPath(); ctx.arc(gx, gy, 1 + 1.9 * k, 0, 6.283); ctx.fill();
+        }
+      }
+      for (var i = parts.length - 1; i >= 0; i--){
+        var p = parts[i]; p.x += p.vx; p.y += p.vy; p.vx *= .96; p.vy *= .96; p.life -= p.d;
+        if (p.life <= 0){ parts.splice(i, 1); continue; }
+        ctx.fillStyle = 'rgba(43,75,242,' + (.55 * p.life).toFixed(3) + ')'; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fill();
+      }
+      /* letters lean toward the light: lift a little, warm toward the accent */
+      var px = ptr.x + stage.getBoundingClientRect().left + window.scrollX, py = ptr.y + stage.getBoundingClientRect().top + window.scrollY;
+      letters.forEach(function(L){
+        var dx = px - L.cx, dy = py - L.cy, d = Math.sqrt(dx * dx + dy * dy), tk = Math.max(0, 1 - d / 260);
+        L.k += (tk - L.k) * .12;
+        var k = L.k;
+        L.el.style.transform = 'translate(' + (dx / (d || 1) * k * 7).toFixed(2) + 'px,' + (-k * 10).toFixed(2) + 'px)';
+        L.el.style.color = k > .01 ? 'rgb(' + mix(INK[0], ACC[0], k * .85) + ',' + mix(INK[1], ACC[1], k * .85) + ',' + mix(INK[2], ACC[2], k * .85) + ')' : '';
+      });
+    }
+    function still(){ ctx.clearRect(0, 0, W, H); if (base) ctx.drawImage(base, 0, 0, W, H); }
+
+    function move(e){
+      var r = stage.getBoundingClientRect(); ptr.tx = e.clientX - r.left; ptr.ty = e.clientY - r.top; ptr.seen = true;
+      var dx = ptr.tx - ptr.lx, dy = ptr.ty - ptr.ly;
+      if (dx * dx + dy * dy > 1600){ ptr.lx = ptr.tx; ptr.ly = ptr.ty; if (parts.length < 60) parts.push({ x: ptr.tx, y: ptr.ty, vx: (Math.random() - .5) * .6, vy: (Math.random() - .5) * .6 - .1, life: 1, d: .018, r: 1.5 + Math.random() * 1.6 }); }
+      /* the button leans toward you when you get close */
+      var btn = document.getElementById('enter'); if (!btn || !fine) return;
+      var b = btn.getBoundingClientRect(), cx = b.left + b.width / 2, cy = b.top + b.height / 2, ddx = e.clientX - cx, ddy = e.clientY - cy, dd = Math.sqrt(ddx * ddx + ddy * ddy), reach = 140;
+      if (dd < reach){ var f = (1 - dd / reach) * .16; btn.style.setProperty('--mx', (ddx * f).toFixed(1) + 'px'); btn.style.setProperty('--my', (ddy * f).toFixed(1) + 'px'); }
+      else { btn.style.setProperty('--mx', '0px'); btn.style.setProperty('--my', '0px'); }
+    }
+    function down(e){
+      var ring = document.createElement('span'); ring.className = 'ring-fx'; ring.style.left = e.clientX + 'px'; ring.style.top = e.clientY + 'px';
+      document.body.appendChild(ring); setTimeout(function(){ ring.remove(); }, 950);
+      var r = stage.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+      for (var i = 0; i < 14 && parts.length < 80; i++){ var a = Math.random() * 6.283, v = 1 + Math.random() * 2.2; parts.push({ x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 1, d: .02, r: 1.4 + Math.random() * 2 }); }
+    }
+
+    size();
+    window.addEventListener('resize', function(){ size(); });
+    window.addEventListener('load', measure);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+    if (reduce){ still(); } else {
+      window.addEventListener('pointermove', move, { passive: true });
+      stage.addEventListener('pointerdown', down);
+      requestAnimationFrame(frame);
+    }
+
+    /* a few lines it could say about you, cycling slowly */
+    var might = document.getElementById('might');
+    var LINES = ['Your peak hour is 10 pm.', 'Not one day off.', 'You searched for the same thing 30 times.', 'Shorts are 75% of what you play.', 'A lot of Entertainment.', 'You are The Night Scholar.', 'Your longest sitting was 4 hours.'];
+    if (might && !reduce){
+      var li = 0;
+      setInterval(function(){
+        might.classList.add('out');
+        setTimeout(function(){ li = (li + 1) % LINES.length; might.textContent = LINES[li]; might.classList.remove('out'); }, 460);
+      }, 3200);
+    }
+  })();
+
+  /* returning with the browser's Back button: start from a clean state */
+  window.addEventListener('pageshow', function(e){
+    if (!e.persisted) return;
+    btn.classList.remove('is-pressed');
+    sweep.classList.remove('run');
+    delete btn.dataset.busy;
+  });
+})();
+</script>
+
+</body>
+</html>

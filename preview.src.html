@@ -1,0 +1,776 @@
+<title>Reflex</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+
+<style>
+/* Layout: an editorial spread, not a grid of identical cards. The hours figure sits
+   open on the page, the alter ego is the single dark object (the one people will
+   screenshot), the heatmap rests on a pale panel, the punchline is open type.
+   Same light-only palette and fonts as the entry screen. */
+:root{
+  --paper:#F5F7F9;
+  --ground:#E7EAEF;
+  --ground-deep:#D7DCE3;
+  --ink:#10141A;
+  --ink-soft:#58626D;
+  --line:#C8CFD8;
+  --accent:#2B4BF2;
+  --ink-faint:#7E8893;
+
+  --on-dark:#F5F7F9;
+  --on-dark-soft:#B4BDC8;
+  --on-dark-faint:#8D97A3;
+
+  /* heat ramp: one hue, light to dark */
+  --h0:#DDE2E9;
+  --h1:#D5DCF8;
+  --h2:#A6B5F3;
+  --h3:#6A85EE;
+  --h4:#2B4BF2;
+  --seg-unsure:#B9C1CC;
+
+  --font-display:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --font-ui:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+
+  --ease:cubic-bezier(.16,.84,.32,1);
+}
+
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--font-ui);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- page ---------- */
+
+.page{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  padding-left:max(1.5rem,env(safe-area-inset-left,0px));
+  padding-right:max(1.5rem,env(safe-area-inset-right,0px));
+  padding-block:1.75rem 4.5rem;
+  background:linear-gradient(180deg,var(--paper) 0%,var(--ground) 38%,var(--ground-deep) 100%);
+}
+.page::before{
+  content:"";
+  position:absolute;
+  inset:-10% -10% auto;
+  height:70vh;
+  z-index:-1;
+  pointer-events:none;
+  background:radial-gradient(42% 60% at 28% 30%,rgba(255,255,255,.9),rgba(255,255,255,0) 70%);
+}
+.wrap{
+  max-width:68rem;
+  min-width:0;
+  margin-inline:auto;
+  display:flex;
+  flex-direction:column;
+  gap:clamp(2.5rem,6vw,4.5rem);
+}
+
+/* ---------- top bar ---------- */
+
+.top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:.75rem 1.25rem;
+}
+.word{
+  font-family:var(--font-display);
+  font-size:1.7rem;
+  line-height:1;
+  letter-spacing:-.02em;
+  color:var(--ink);
+  text-decoration:none;
+}
+.word:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:2px}
+.tag{
+  margin:0 0 1.25rem;
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+  font-family:var(--font-mono);
+  font-size:.68rem;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.55);
+  border-radius:999px;
+  padding:.4rem .8rem;
+}
+.tag i{flex:none;width:.45rem;height:.45rem;border-radius:50%;background:var(--accent)}
+
+
+/* ---------- nav (shared by every screen) ---------- */
+.nav{display:flex;align-items:center;flex-wrap:wrap;gap:.35rem 1.5rem;font-family:var(--font-ui);font-size:.85rem}
+.nav a,.nav .soon{position:relative;padding:.3rem 0;color:var(--ink-soft);text-decoration:none;white-space:nowrap}
+.nav a{transition:color .2s}
+.nav a:hover,.nav a[aria-current="page"]{color:var(--ink)}
+.nav a[aria-current="page"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:var(--ink)}
+.nav a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+.nav .soon{color:var(--ink-faint,#949EA9);cursor:default}
+.nav a.go{background:var(--ink);color:var(--paper);padding:.5rem 1.05rem;border-radius:3px;font-weight:500;transition:background .25s var(--ease),transform .25s var(--ease)}
+.nav a.go:hover{background:#000;color:var(--paper);transform:translateY(-1px)}
+.nav a.go[aria-current="page"]::after{display:none}
+.nav small{margin-left:.4rem;font-family:var(--font-mono);font-size:.58rem;letter-spacing:.07em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:.08rem .38rem;vertical-align:.1em}
+
+/* ---------- intro ---------- */
+
+.title{
+  font-family:var(--font-display);
+  font-weight:400;
+  font-size:clamp(2.75rem,8vw,5.75rem);
+  line-height:.95;
+  letter-spacing:-.025em;
+  margin:0 0 1rem;
+  text-wrap:balance;
+}
+.lede{
+  margin:0;
+  max-width:40ch;
+  font-size:clamp(.95rem,1.5vw,1.05rem);
+  line-height:1.5;
+  color:var(--ink-soft);
+}
+
+.eyebrow{
+  margin:0 0 1rem;
+  font-family:var(--font-mono);
+  font-size:.68rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+
+/* ---------- hours + alter ego ---------- */
+
+.spread{
+  display:grid;
+  grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);
+  gap:clamp(1.75rem,4.5vw,4rem);
+  align-items:stretch;
+}
+
+.hero{min-width:0}
+.big{
+  display:flex;
+  align-items:baseline;
+  flex-wrap:wrap;
+  gap:0 .18em;
+  margin:0;
+  font-family:var(--font-display);
+  font-size:clamp(5rem,14vw,10rem);
+  line-height:.84;
+  letter-spacing:-.04em;
+}
+.big .unit{font-size:.26em;font-style:italic;letter-spacing:0}
+.gloss{
+  margin:1.1rem 0 0;
+  max-width:34ch;
+  font-size:1.05rem;
+  line-height:1.5;
+  color:var(--ink-soft);
+}
+
+.split{display:flex;gap:2px;height:.6rem;margin-top:1.9rem}
+.seg{display:block;height:100%}
+.seg:first-child{border-radius:3px 0 0 3px}
+.seg:last-child{border-radius:0 3px 3px 0}
+.seg--videos{background:var(--ink)}
+.seg--shorts{background:var(--accent)}
+.seg--unsure{background:var(--seg-unsure)}
+.key{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.4rem 1.4rem;
+  list-style:none;
+  margin:.85rem 0 0;
+  padding:0;
+  font-family:var(--font-mono);
+  font-size:.72rem;
+  color:var(--ink-soft);
+}
+.key li{display:inline-flex;align-items:center;gap:.45rem}
+.key b{font-weight:400;color:var(--ink)}
+.sw{flex:none;width:.6rem;height:.6rem;border-radius:2px}
+
+.ego{
+  min-width:0;
+  min-height:19rem;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  gap:2rem;
+  padding:clamp(1.4rem,3vw,2.2rem);
+  border-radius:4px;
+  color:var(--on-dark);
+  background:radial-gradient(70% 55% at 88% 0%,rgba(84,112,255,.34),rgba(84,112,255,0) 70%),var(--ink);
+}
+.ego .eyebrow{color:var(--on-dark-faint)}
+.ego-name{
+  font-family:var(--font-display);
+  font-weight:400;
+  font-size:clamp(2.5rem,5vw,3.7rem);
+  line-height:.98;
+  letter-spacing:-.025em;
+  margin:0 0 1rem;
+  text-wrap:balance;
+}
+.ego-why{margin:0;max-width:30ch;font-size:1rem;line-height:1.5;color:var(--on-dark-soft)}
+.ego-foot{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:.75rem 1rem}
+.ego-mix{margin:0;font-family:var(--font-mono);font-size:.7rem;letter-spacing:.04em;color:var(--on-dark-faint)}
+.sig{margin:0;font-family:var(--font-display);font-style:italic;font-size:1.25rem;line-height:1;color:var(--on-dark-soft)}
+
+/* ---------- heatmap ---------- */
+
+.panel{
+  position:relative;
+  min-width:0;
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:4px;
+  padding:clamp(1.1rem,2.6vw,1.9rem);
+}
+.panel-head{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:1rem 2rem}
+.panel-title{
+  font-family:var(--font-display);
+  font-weight:400;
+  font-size:clamp(1.7rem,3.6vw,2.6rem);
+  line-height:1.02;
+  letter-spacing:-.02em;
+  margin:0 0 .5rem;
+  text-wrap:balance;
+}
+.panel-sub{margin:0;font-size:.92rem;color:var(--ink-soft)}
+.scale{display:inline-flex;align-items:center;gap:4px;font-family:var(--font-mono);font-size:.68rem;color:var(--ink-soft)}
+.scale span{margin:0 .35rem}
+.scale i{display:block;width:.7rem;height:.7rem;border-radius:2px}
+
+.scroller{overflow-x:auto;margin-top:1.5rem;padding-bottom:.35rem}
+.heat{
+  display:grid;
+  grid-template-rows:auto repeat(7,auto);
+  grid-template-columns:2.1rem;
+  grid-auto-flow:column;
+  grid-auto-columns:minmax(11px,1fr);
+  gap:3px;
+  min-width:640px;
+  padding:2px;
+}
+.cell{
+  display:block;
+  min-width:0;
+  aspect-ratio:1;
+  border-radius:2px;
+  background:var(--lv,var(--h0));
+  animation:cellIn .5s var(--ease) calc(.55s + var(--c,0) * 16ms) both;
+}
+.cell.l1{--lv:var(--h1)}
+.cell.l2{--lv:var(--h2)}
+.cell.l3{--lv:var(--h3)}
+.cell.l4{--lv:var(--h4)}
+.cell--pad{visibility:hidden;animation:none}
+.cell[data-i]:hover{outline:1.5px solid var(--ink);outline-offset:1px}
+@keyframes cellIn{from{background-color:var(--h0);transform:scale(.5)}}
+
+.dlab,.mlab{font-family:var(--font-mono);font-size:.62rem;line-height:1;color:var(--ink-soft);white-space:nowrap}
+.dlab{display:flex;align-items:center}
+.mlab{align-self:end;padding-bottom:3px}
+.panel-note{margin:1rem 0 0;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.02em;color:var(--ink-soft)}
+
+.tip{
+  position:absolute;
+  left:0;
+  top:0;
+  z-index:4;
+  pointer-events:none;
+  opacity:0;
+  white-space:nowrap;
+  transform:translate(-50%,calc(-100% - 8px));
+  background:var(--ink);
+  color:var(--paper);
+  font-family:var(--font-mono);
+  font-size:.7rem;
+  letter-spacing:.02em;
+  padding:.35rem .55rem;
+  border-radius:3px;
+  transition:opacity .12s;
+}
+
+/* ---------- punchline + continue ---------- */
+
+.say .eyebrow{margin-bottom:1.1rem}
+.quote{
+  margin:0;
+  max-width:28ch;
+  font-family:var(--font-display);
+  font-weight:400;
+  font-size:clamp(1.9rem,4.6vw,3.5rem);
+  line-height:1.08;
+  letter-spacing:-.018em;
+  text-wrap:balance;
+}
+.quote em{font-style:italic}
+
+.cta{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:1.75rem 2.5rem;
+  border-top:1px solid var(--line);
+  padding-top:2rem;
+}
+.cta-line{
+  font-family:var(--font-display);
+  font-size:clamp(1.5rem,3vw,2.1rem);
+  line-height:1.15;
+  letter-spacing:-.01em;
+  margin:0 0 .6rem;
+  text-wrap:balance;
+}
+.cta-note{margin:0;max-width:44ch;font-size:.92rem;line-height:1.5;color:var(--ink-soft)}
+
+.enter{
+  position:relative;
+  overflow:hidden;
+  display:inline-flex;
+  align-items:center;
+  gap:.6rem;
+  font-family:var(--font-ui);
+  font-size:.9rem;
+  font-weight:500;
+  letter-spacing:.005em;
+  color:var(--paper);
+  background:var(--ink);
+  border:1px solid var(--ink);
+  border-radius:3px;
+  padding:.8rem 1.35rem;
+  cursor:pointer;
+  text-decoration:none;
+  transition:background .25s var(--ease),transform .25s var(--ease);
+}
+.enter:hover{background:#000;transform:translateY(-1px)}
+.enter:active{transform:translateY(0)}
+.enter:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.enter svg{flex:none;transition:transform .3s var(--ease)}
+.enter:hover svg{transform:translateX(3px)}
+.enter::after{
+  content:"";
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:-60%;
+  width:45%;
+  pointer-events:none;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.55) 42%,rgba(126,152,255,.75) 52%,transparent);
+  opacity:0;
+}
+.enter.is-pressed::after{animation:glint .6s var(--ease)}
+@keyframes glint{
+  0%{opacity:1;transform:translateX(0)}
+  100%{opacity:1;transform:translateX(360%)}
+}
+
+
+.more .eyebrow{margin-bottom:1rem}
+.more-line{margin:0;max-width:40ch;font-family:var(--font-display);font-size:clamp(1.4rem,2.8vw,2rem);line-height:1.2;letter-spacing:-.01em;text-wrap:balance}
+.more-line em{font-style:italic}
+
+.foot{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:.6rem 2rem;
+  margin-top:-1rem;
+  font-family:var(--font-mono);
+  font-size:.7rem;
+  letter-spacing:.05em;
+  color:var(--ink-soft);
+}
+.foot p{margin:0}
+.foot b{font-weight:400;color:var(--ink)}
+.foot i{font-style:italic}
+
+/* ---------- surface light, shared with the entry screen ---------- */
+
+.sheen{
+  position:fixed;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+  opacity:0;
+  background:radial-gradient(260px 260px at var(--x,50%) var(--y,50%),rgba(255,255,255,.4),rgba(255,255,255,0) 70%);
+  transition:opacity .4s var(--ease);
+}
+@media (hover:hover) and (pointer:fine){ .sheen{opacity:1} }
+
+.sweep{
+  position:fixed;
+  inset:0;
+  z-index:3;
+  pointer-events:none;
+  opacity:0;
+  background:linear-gradient(104deg,transparent 36%,rgba(255,255,255,.9) 50%,transparent 64%);
+  transform:translateX(-120%);
+}
+/* arrival: the glare from the entry screen finishes its pass */
+.sweep.arrive{animation:arrive .75s cubic-bezier(.2,0,.2,1) both}
+@keyframes arrive{
+  from{opacity:1;transform:translateX(0)}
+  to{opacity:1;transform:translateX(120%)}
+}
+.sweep.run{animation:sweep .95s cubic-bezier(.4,0,.2,1)}
+@keyframes sweep{
+  0%{opacity:1;transform:translateX(-120%)}
+  100%{opacity:1;transform:translateX(120%)}
+}
+
+/* ---------- entrance ---------- */
+
+@keyframes rise{
+  from{opacity:0;transform:translateY(16px)}
+  to{opacity:1;transform:none}
+}
+.rise{animation:rise .8s var(--ease) var(--d,0s) both}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001s!important;
+    animation-delay:0s!important;
+    animation-iteration-count:1!important;
+    transition-duration:.001s!important;
+  }
+}
+
+@media (max-width:820px){
+  .spread{grid-template-columns:minmax(0,1fr)}
+  .ego{min-height:15rem}
+}
+@media (max-width:520px){
+  .cta{align-items:flex-start}
+}
+
+/* big screens: scale the whole page up a notch and give it more width, so it doesn't float in the middle */
+@media (min-width:1500px){html{font-size:112.5%}.wrap{max-width:80rem}}
+@media (min-width:1900px){html{font-size:125%}.wrap{max-width:80rem}}
+@media (min-width:2500px){html{font-size:150%}}
+
+.gl-title{margin:0 0 1.75rem;max-width:26ch;font-family:var(--font-display);font-weight:400;font-size:clamp(1.7rem,3.6vw,2.6rem);line-height:1.1;letter-spacing:-.015em;text-wrap:balance}
+.gl-title em{font-style:italic}
+.glimpse .eyebrow{margin-bottom:1rem}
+.gl-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.gl-k{margin:0 0 1rem;font-family:var(--font-mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase}
+.gl-tile{background:var(--ink);color:var(--paper);border-radius:6px;padding:1.6rem;display:flex;flex-direction:column;gap:.6rem;min-height:15rem;background-image:radial-gradient(60% 70% at 85% 0,rgba(84,112,255,.35),rgba(84,112,255,0) 70%)}
+.gl-tile .gl-k{color:#8D97A3}
+.gl-name{margin:auto 0 0;font-family:var(--font-display);font-size:clamp(2rem,4vw,3rem);line-height:1;letter-spacing:-.02em}
+.gl-stat{margin:0;font-size:.95rem;color:#C3CAD3}.gl-stat b{color:#fff;font-weight:500}
+.gl-sub{margin:.4rem 0 0;max-width:36ch;font-size:.82rem;line-height:1.5;color:#8D97A3}
+.gl-rep{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:1.6rem}
+.gl-rep .gl-k{color:var(--ink-faint)}
+.gl-rep ul{list-style:none;margin:0;padding:0}
+.gl-rep li{display:flex;justify-content:space-between;gap:1rem;padding:.7rem 0;border-top:1px solid var(--line);font-size:.92rem}
+.gl-rep li:first-child{border-top:0;padding-top:0}
+.gl-rep li i{font-style:normal;color:var(--ink-soft);filter:blur(5px);user-select:none;white-space:nowrap}
+.gl-hint{margin:1rem 0 0;font-family:var(--font-mono);font-size:.7rem;color:var(--ink-faint)}
+@media (max-width:760px){.gl-grid{grid-template-columns:1fr}.gl-tile{min-height:12rem}}
+.gl-card{margin:0;display:flex;flex-direction:column;gap:.9rem}
+.gl-zoom{position:relative;display:block;width:100%;max-width:26rem;margin-inline:auto;padding:0;border:0;background:none;cursor:zoom-in;line-height:0;filter:drop-shadow(0 24px 34px rgba(16,20,26,.28));transition:transform .35s var(--ease)}
+.gl-zoom:hover{transform:translateY(-4px) scale(1.012)}
+.gl-zoom img{width:100%;height:auto;display:block}
+.gl-zoom:focus-visible{outline:2px solid var(--accent);outline-offset:6px;border-radius:30px}
+.gl-chip{position:absolute;right:.9rem;bottom:.9rem;font-family:var(--font-mono);font-size:.64rem;letter-spacing:.06em;line-height:1;text-transform:uppercase;color:#fff;background:rgba(16,20,26,.82);padding:.45rem .65rem;border-radius:999px;opacity:0;transition:opacity .2s}
+.gl-zoom:hover .gl-chip,.gl-zoom:focus-visible .gl-chip{opacity:1}
+@media (hover:none){.gl-chip{opacity:1}}
+.gl-card figcaption{max-width:26rem;margin-inline:auto;font-size:.84rem;line-height:1.5;color:var(--ink-soft);text-align:center}
+.gl-card figcaption b{color:var(--ink);font-weight:500}
+dialog#gl-dlg{border:0;padding:0;background:transparent;max-width:none;max-height:none;width:100vw;height:100vh;overflow:hidden;cursor:zoom-out;outline:none}
+dialog#gl-dlg[open]{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.75rem}
+dialog#gl-dlg::backdrop{background:rgba(16,20,26,.9)}
+#gl-dlg img{max-width:94vw;max-height:calc(100vh - 4rem);width:auto;height:auto;filter:drop-shadow(0 30px 60px rgba(0,0,0,.55))}
+#gl-dlg p{margin:0;font-family:var(--font-mono);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:#8D97A3}
+.gl-grid{align-items:center}
+
+.gl-grid{grid-template-columns:minmax(0,26rem) minmax(0,1fr);align-items:stretch;gap:1.5rem}
+.gl-zoom{max-width:none;margin:0}
+.gl-rep{display:flex;flex-direction:column;padding:2rem 2.2rem}
+.gl-rep ul{flex:1;display:flex;flex-direction:column;justify-content:space-between}
+.gl-rep li{font-size:1.1rem;padding:0;border-top:0;align-items:baseline}
+.gl-rep li+li{padding-top:1.1rem;border-top:1px solid var(--line)}
+.gl-rep li:first-child{padding-top:0}
+.gl-hint{margin-top:1.4rem}
+.gl-cap{margin:1rem 0 0;max-width:26rem;font-size:.84rem;line-height:1.5;color:var(--ink-soft)}
+.gl-cap b{color:var(--ink);font-weight:500}
+@media (max-width:760px){.gl-grid{grid-template-columns:1fr}.gl-zoom{max-width:26rem;margin-inline:auto}.gl-rep{padding:1.6rem}.gl-rep li{font-size:.95rem}.gl-cap{margin-inline:auto;text-align:center}}
+</style>
+
+<div class="page">
+  <div class="wrap">
+
+    <header class="top rise"><a class="word" href="index.html">Reflex</a><nav class="nav" aria-label="Primary"><a href="about.html">What it is</a><a href="preview.html" aria-current="page">Preview</a><a href="how.html">How it works</a><a href="privacy.html">Privacy</a><a class="go" href="upload.html">Upload</a></nav></header>
+
+    <section class="intro rise" style="--d:.08s">
+      <p class="tag"><i></i>Example &middot; every number here is made up</p>
+      <h1 class="title">Here&rsquo;s what I see.</h1>
+      <p class="lede">A sample, so you know what you’re getting into. Yours is a lot more personal.</p>
+    </section>
+
+    <section class="spread">
+      <article class="hero rise" style="--d:.2s">
+        <p class="eyebrow">Time watched &middot; 1 Jan &ndash; 25 Oct</p>
+        <p class="big"><span id="hours">1,147</span><span class="unit">hours</span></p>
+        <p class="gloss" id="gloss">That is 47 days and 19 hours of this year.</p>
+
+        <div class="split" role="img" aria-label="Videos 56 percent, Shorts 41 percent, removed 3 percent">
+          <span class="seg seg--videos" style="flex:56"></span>
+          <span class="seg seg--shorts" style="flex:41"></span>
+          <span class="seg seg--unsure" style="flex:3"></span>
+        </div>
+        <ul class="key">
+          <li><i class="sw" style="background:var(--ink)"></i>Videos <b>56%</b></li>
+          <li><i class="sw" style="background:var(--accent)"></i>Shorts <b>41%</b></li>
+          <li><i class="sw" style="background:var(--seg-unsure)"></i>Removed <b>3%</b></li>
+        </ul>
+      </article>
+
+      <article class="ego rise" style="--d:.3s">
+        <div>
+          <p class="eyebrow">Your alter ego</p>
+          <h2 class="ego-name">The Night Scholar</h2>
+          <p class="ego-why">Education is 44% of what you watch. 71% of it happens after midnight.</p>
+        </div>
+        <div class="ego-foot">
+          <p class="ego-mix">Education 44 &middot; Comedy 21 &middot; Sports 12</p>
+          <p class="sig">Reflex</p>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel rise" id="panel" style="--d:.4s" aria-labelledby="streak-h">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title" id="streak-h"><span id="days">298</span> days. You didn&rsquo;t miss one.</h2>
+          <p class="panel-sub">One square per day. Darker means more hours.</p>
+        </div>
+        <div class="scale" aria-hidden="true">
+          <span>Less</span>
+          <i style="background:var(--h0)"></i><i style="background:var(--h1)"></i><i style="background:var(--h2)"></i><i style="background:var(--h3)"></i><i style="background:var(--h4)"></i>
+          <span>More</span>
+        </div>
+      </div>
+
+      <div class="scroller" id="scroller">
+        <div class="heat" id="heat" role="img" aria-label="Calendar heatmap of watch hours per day, 1 January to 25 October. Every day has some activity, and weekends run heaviest."></div>
+      </div>
+      <p class="panel-note" id="note">Busiest day 11.3 h. A typical day is 3.8 h.</p>
+      <div class="tip" id="tip" aria-hidden="true"></div>
+    </section>
+
+
+    <section class="glimpse rise" style="--d:.6s" aria-labelledby="gl-h">
+      <p class="eyebrow">That was a glimpse</p>
+      <h2 class="gl-title" id="gl-h">Yours comes with a share tile and a full report. <em>Full of surprises.</em></h2>
+      <div class="gl-grid">
+        <figure class="gl-card">
+          <button type="button" class="gl-zoom" id="gl-open" aria-label="Enlarge the sample share card">
+            <img src="preview-card.webp" width="900" height="1125" alt="A sample share card: The Night Scholar, 1,147 hours, a 298-day streak, top channels and a videos vs Shorts split. All numbers made up." loading="lazy">
+            <span class="gl-chip" aria-hidden="true">Click to enlarge</span>
+          </button>
+        </figure>
+        <article class="gl-rep" aria-label="What the full report holds">
+          <p class="gl-k">Your full report</p>
+          <ul>
+            <li><span>Top channels</span><i aria-hidden="true">Kurzgesagt &middot; 212 h</i></li>
+            <li><span>Subs you ghost</span><i aria-hidden="true">14 channels, 0 videos</i></li>
+            <li><span>Busiest month</span><i aria-hidden="true">August &middot; 164 h</i></li>
+            <li><span>Peak hour</span><i aria-hidden="true">1 am &middot; 71% after midnight</i></li>
+            <li><span>Any single month</span><i aria-hidden="true">its own report</i></li>
+          </ul>
+          <p class="gl-hint">Those values are blurred on purpose. Yours aren&rsquo;t.</p>
+        </article>
+      </div>
+      <p class="gl-cap"><b>Your share tile</b> (left): pick a tagline or write your own, then download it as Story, Post, or just the card. Sample numbers only.</p>
+    </section>
+
+    <div class="cta rise" style="--d:.65s">
+      <div>
+        <p class="cta-line">That one was made up. I’d rather read yours.</p>
+        <p class="cta-note">Google takes a bit to hand your data over, anywhere from minutes to hours. I’ll show you how.</p>
+      </div>
+      <a class="enter" id="go" href="how.html">
+        <span>Read mine</span>
+        <svg width="15" height="11" viewBox="0 0 15 11" fill="none" aria-hidden="true">
+          <path d="M1 5.5h12M9 1.5l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+
+    <footer class="foot">
+      <p class="foot-def"><b>rewind</b> <i>(v.)</i> &mdash; to watch it back, this time paying attention.</p>
+      <p class="foot-note">Made by Tarun &middot; Not affiliated with YouTube or Google.</p>
+    </footer>
+
+  </div>
+</div>
+
+<div class="sheen" aria-hidden="true"></div>
+<div class="sweep arrive" aria-hidden="true"></div>
+
+<dialog id="gl-dlg" aria-label="Sample share card, full size"><img src="preview-card.webp" alt="Sample share card, enlarged"><p>Click anywhere or press Esc to close</p></dialog>
+<script>
+(function(){
+  var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var D = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+  /* invented, repeatable data: same numbers every load, and every figure on the
+     page is computed from this one series so the cards agree with each other */
+  function rng(a){
+    return function(){
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  var rand = rng(2026);
+  var T0 = Date.UTC(2026, 0, 1), N = 298, DAY = 864e5;
+  var lullA = Date.UTC(2026, 7, 10), lullB = Date.UTC(2026, 7, 16);
+  var hours = [], total = 0, best = 0, bestI = 0, i;
+
+  for (i = 0; i < N; i++){
+    var t = T0 + i * DAY, dow = (new Date(t).getUTCDay() + 6) % 7;
+    var h = (dow >= 5 ? 5.7 : 2.85) * (1 + .16 * Math.sin(i / 21)) * (.55 + rand() * .9);
+    if (rand() < .035) h += 3 + rand() * 4;
+    if (t >= lullA && t <= lullB) h *= .45;
+    h = Math.min(11.8, Math.max(.3, h));
+    hours.push(h); total += h;
+    if (h > best){ best = h; bestI = i; }
+  }
+
+  function plural(n, w){ return n + ' ' + w + (n === 1 ? '' : 's'); }
+  function lv(h){ return h < 2 ? 1 : h < 4 ? 2 : h < 6.5 ? 3 : 4; }
+  function label(i){
+    var d = new Date(T0 + i * DAY);
+    return D[(d.getUTCDay() + 6) % 7] + ' ' + d.getUTCDate() + ' ' + M[d.getUTCMonth()];
+  }
+
+  /* headline figures */
+  var tr = Math.round(total), dd = Math.floor(tr / 24), hh = tr - dd * 24;
+  document.getElementById('hours').textContent = tr.toLocaleString('en-US');
+  document.getElementById('gloss').textContent = 'That’s ' + plural(dd, 'day') + ' and ' + plural(hh, 'hour') + ' of this year.';
+  document.getElementById('days').textContent = N;
+  var sorted = hours.slice().sort(function(a, b){ return a - b; });
+  document.getElementById('note').textContent =
+    'Busiest day ' + best.toFixed(1) + ' h, ' + label(bestI) + '. A typical day is ' + sorted[Math.floor(N / 2)].toFixed(1) + ' h.';
+
+  /* heatmap: label column, then one column per week (month slot + 7 days) */
+  var heat = document.getElementById('heat');
+  var OFF = (new Date(T0).getUTCDay() + 6) % 7;
+  var cols = Math.ceil((OFF + N) / 7);
+  var frag = document.createDocumentFragment();
+  function el(cls, txt){
+    var s = document.createElement('span');
+    s.className = cls;
+    if (txt) s.textContent = txt;
+    return s;
+  }
+
+  frag.appendChild(el('slot'));
+  ['Mon','','Wed','','Fri','',''].forEach(function(l){ frag.appendChild(el('dlab', l)); });
+
+  var monthCol = {}, m;
+  for (m = 0; m < 10; m++){
+    var p0 = OFF + Math.round((Date.UTC(2026, m, 1) - T0) / DAY);
+    monthCol[Math.floor(p0 / 7)] = M[m];
+  }
+  for (var c = 0; c < cols; c++){
+    frag.appendChild(el('mlab', monthCol[c] || ''));
+    for (var r = 0; r < 7; r++){
+      var di = c * 7 + r - OFF, cell = el('cell');
+      cell.style.setProperty('--c', c);
+      if (di < 0 || di >= N){
+        cell.className = 'cell cell--pad';
+      } else {
+        cell.className = 'cell l' + lv(hours[di]);
+        cell.dataset.i = di;
+      }
+      frag.appendChild(cell);
+    }
+  }
+  heat.appendChild(frag);
+
+  /* hover readout */
+  var tip = document.getElementById('tip'), panel = document.getElementById('panel');
+  heat.addEventListener('pointerover', function(e){
+    var cell = e.target.closest && e.target.closest('.cell[data-i]');
+    if (!cell) return;
+    var k = +cell.dataset.i;
+    tip.textContent = label(k) + ' · ' + hours[k].toFixed(1) + ' h';
+    var a = cell.getBoundingClientRect(), b = panel.getBoundingClientRect();
+    var w = tip.offsetWidth, x = a.left - b.left + a.width / 2;
+    x = Math.max(w / 2 + 4, Math.min(b.width - w / 2 - 4, x));
+    tip.style.left = x + 'px';
+    tip.style.top = (a.top - b.top) + 'px';
+    tip.style.opacity = 1;
+  });
+  heat.addEventListener('pointerleave', function(){ tip.style.opacity = 0; });
+
+  /* on a phone the grid scrolls sideways; open on the most recent weeks */
+  var sc = document.getElementById('scroller');
+  if (window.innerWidth < 700){
+    requestAnimationFrame(function(){ sc.scrollLeft = sc.scrollWidth; });
+  }
+
+  /* shared surface light */
+  var sheen = document.querySelector('.sheen');
+  var sweep = document.querySelector('.sweep');
+  var btn = document.getElementById('go');
+
+  if (window.matchMedia('(hover:hover) and (pointer:fine)').matches){
+    window.addEventListener('pointermove', function(e){
+      sheen.style.setProperty('--x', e.clientX + 'px');
+      sheen.style.setProperty('--y', e.clientY + 'px');
+    }, {passive:true});
+  }
+  sweep.addEventListener('animationend', function(e){
+    if (e.animationName === 'arrive') sweep.classList.remove('arrive');
+  });
+
+  btn.addEventListener('click', function(e){
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+    e.preventDefault();
+    if (btn.dataset.busy) return;
+    btn.dataset.busy = '1';
+    btn.classList.add('is-pressed');
+    sweep.classList.remove('arrive', 'run');
+    void sweep.offsetWidth;
+    sweep.classList.add('run');
+    setTimeout(function(){ btn.classList.remove('is-pressed'); }, 640);
+    /* leave mid-glare; next screen: privacy */
+    setTimeout(function(){ window.location.href = btn.getAttribute('href'); }, 480);
+    setTimeout(function(){
+      sweep.classList.remove('run');
+      delete btn.dataset.busy;
+    }, 1000);
+  });
+  window.addEventListener('pageshow', function(e){
+    if (!e.persisted) return;
+    btn.classList.remove('is-pressed'); sweep.classList.remove('run'); delete btn.dataset.busy;
+  });
+})();
+</script>
+<script>
+(function(){var o=document.getElementById('gl-open'),d=document.getElementById('gl-dlg');
+if(!o||!d||!d.showModal)return;o.addEventListener('click',function(){d.showModal()});d.addEventListener('click',function(){d.close()});})();
+</script>
+

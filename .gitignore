@@ -1,0 +1,39 @@
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+*.egg-info/
+
+# secrets
+.env
+.env.*
+!.env.example
+
+# personal data: never commit
+data/
+takeouts/
+Takeout/
+*.zip
+*.tgz
+*.tar.gz
+watch-history*.json
+*.sqlite
+*.sqlite3
+*.db
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# raw screen recordings (the first one shows an email address)
+howtoclips/
+
+# editor / os
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+node_modules/
