@@ -1,5 +1,5 @@
 # Reflex: one container serves the pages and the API.
-# Hugging Face Spaces (Docker SDK) expects the app on port 7860 and runs it as user 1000.
+# Listens on $PORT when the host sets one (Render, Cloud Run), otherwise 7860. Runs as a non-root user.
 FROM python:3.12-slim
 
 ENV PYTHONUNBUFFERED=1 \
@@ -24,4 +24,4 @@ RUN mkdir -p /app/data && chown -R user:user /app/data
 USER user
 
 EXPOSE 7860
-CMD ["reflex", "serve", "--web", "/app/web", "--cache", "/app/data/cache.sqlite", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["sh", "-c", "exec reflex serve --web /app/web --cache /app/data/cache.sqlite --host 0.0.0.0 --port ${PORT:-7860}"]
