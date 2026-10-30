@@ -12,7 +12,7 @@ Drop in your Google Takeout ZIP and get a shareable report: how much you really 
 ![polars](https://img.shields.io/badge/polars-dataframes-10141A)
 ![Tests](https://img.shields.io/badge/tests-195%20passing-2B4BF2)
 
-**[Live demo](https://REPLACE-WITH-YOUR-RENDER-URL.onrender.com)** &nbsp;·&nbsp; [How it works](#how-it-works) &nbsp;·&nbsp; [Privacy by design](#privacy-by-design) &nbsp;·&nbsp; [Run it locally](#run-it-locally)
+**[Live demo](https://reflex-k8nt.onrender.com/)** &nbsp;·&nbsp; [How it works](#how-it-works) &nbsp;·&nbsp; [Privacy by design](#privacy-by-design) &nbsp;·&nbsp; [Run it locally](#run-it-locally)
 
 </div>
 
